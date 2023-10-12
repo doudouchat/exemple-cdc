@@ -1,0 +1,11 @@
+logging:
+   pattern:
+      console: "%d %-5p: %C - %m%n"
+   level:
+      root: WARN
+      com.exemple.cdc: DEBUG
+      com.datastax.oss.driver: INFO
+cassandra:
+    version: ${cassandra-version}
+    agent: file:${project.build.directory}/${project.artifactId}-${project.version}.jar
+    lib: file:${project.build.directory}/lib
