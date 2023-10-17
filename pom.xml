@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-dependencies</artifactId>
-		<version>2.7.16</version>
+		<version>3.1.4</version>
 	</parent>
 	<groupId>exemple</groupId>
 	<artifactId>exemple-cdc</artifactId>
@@ -50,23 +50,6 @@
 						<artifactId>*</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-
-			<!-- COMMONS APACHE -->
-
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>2.13.0</version>
-			</dependency>
-
-			<!-- CASSANDRA CONTAINER -->
-
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>cassandra</artifactId>
-				<version>1.18.0</version>
-				<scope>test</scope>
 			</dependency>
 
 			<!-- JACOCO -->

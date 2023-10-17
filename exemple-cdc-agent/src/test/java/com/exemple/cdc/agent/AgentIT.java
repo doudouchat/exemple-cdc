@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import org.apache.commons.io.FileUtils;
 import org.jacoco.core.data.ExecutionDataWriter;
 import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.ResourceUtils;
 import org.testcontainers.containers.GenericContainer;
@@ -38,8 +38,8 @@ class AgentIT {
     @BeforeAll
     public void createSchema() throws IOException {
 
-        var schema = ResourceUtils.getFile("classpath:script/schema.cql");
-        Arrays.stream(FileUtils.readFileToString(schema, StandardCharsets.UTF_8).trim().split(";")).forEach(session::execute);
+        var schema = new FileSystemResource(ResourceUtils.getFile("classpath:script/schema.cql"));
+        Arrays.stream(schema.getContentAsString(StandardCharsets.UTF_8).trim().split(";")).forEach(session::execute);
 
     }
 

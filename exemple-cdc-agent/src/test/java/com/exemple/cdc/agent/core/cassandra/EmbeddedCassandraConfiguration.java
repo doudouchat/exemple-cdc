@@ -3,25 +3,29 @@ package com.exemple.cdc.agent.core.cassandra;
 import java.io.IOException;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ResourceUtils;
 import org.testcontainers.containers.CassandraContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableConfigurationProperties(EmbeddedCassandraConfigurationProperties.class)
+@Testcontainers
 @Slf4j
 @RequiredArgsConstructor
 public class EmbeddedCassandraConfiguration {
 
     private final EmbeddedCassandraConfigurationProperties properties;
 
-    @Bean(initMethod = "start")
+    @Bean
+    @ServiceConnection
     public CassandraContainer<?> embeddedServer() throws IOException {
 
         var agent = ResourceUtils.getFile(properties.getAgent()).getAbsolutePath();
