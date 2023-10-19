@@ -5,7 +5,11 @@ logging:
       root: WARN
       com.exemple.cdc: DEBUG
       com.datastax.oss.driver: INFO
+      org.kafka: WARN
 cassandra:
-    version: ${cassandra-version}
-    agent: file:${project.build.directory}/${project.artifactId}-${project.version}.jar
+    version: ${cassandra.version}
+    agent: file:${project.build.directory}/${project.artifactId}-${project.version}-exec.jar
     lib: file:${project.build.directory}/lib
+    conf: file:${project.build.testOutputDirectory}/conf/cdc
+kafka:
+   version: ${io.confluent.kafka.version}

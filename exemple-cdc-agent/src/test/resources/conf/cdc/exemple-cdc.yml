@@ -1,0 +1,5 @@
+kafka:
+   bootstrap_servers: kafka_network:9092
+   timeout: 10
+   topics:
+      test: topic_test

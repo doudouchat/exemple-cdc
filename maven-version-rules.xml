@@ -2,6 +2,6 @@
 	<ignoreVersions>
 		<ignoreVersion type="regex">(?i).*atlassian(?:-?\d+)?</ignoreVersion>
 		<ignoreVersion type="regex">(?i).*redhat(?:-?\d+)?</ignoreVersion>
-		<ignoreVersion type="regex">(?i).*(alpha|beta|RC|CR|M)(?:.?-?\d+)?</ignoreVersion>
+		<ignoreVersion type="regex">(?i).*(alpha|beta|RC|CR|M|ce|ccs)(?:.?-?\d+)?</ignoreVersion>
 	</ignoreVersions>
 </ruleset>

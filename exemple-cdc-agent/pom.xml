@@ -16,6 +16,18 @@
 
 	<dependencies>
 
+		<!-- KAFKA -->
+
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-clients</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.confluent</groupId>
+			<artifactId>kafka-json-schema-serializer</artifactId>
+		</dependency>
+
 		<!-- CASSANDRA -->
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
@@ -29,24 +41,54 @@
 			<artifactId>java-driver-core</artifactId>
 		</dependency>
 
+		<!-- DAGGER -->
+
+		<dependency>
+			<groupId>com.google.dagger</groupId>
+			<artifactId>dagger</artifactId>
+		</dependency>
+
+		<!-- FASTER JACKSON -->
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+		</dependency>
+
+		<!-- COMMONS APACHE -->
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+
+		<!-- GOOGLE GUAVA -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
 		<!-- TEST -->
 
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-test</artifactId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<version>3.1.5</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-testcontainers</artifactId>
+			<version>3.1.5</version>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- AWAITILITY -->
+
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
 		</dependency>
 
 		<!-- CASSANDRA CONTAINER -->
@@ -60,6 +102,12 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>cassandra</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>kafka</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -96,6 +144,30 @@
 				</configuration>
 			</plugin>
 
+			<!-- ASSEMBLY -->
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.6.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Premain-Class>com.exemple.cdc.agent.Agent</Premain-Class>
+						</manifestEntries>
+					</archive>
+					<descriptors>
+						<descriptor>src/assembly/agent-assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
+
 			<!-- JACOCO -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -128,7 +200,7 @@
 						<artifactItem>
 							<groupId>org.jacoco</groupId>
 							<artifactId>org.jacoco.agent</artifactId>
-							<version>${jacoco-version}</version>
+							<version>${jacoco.version}</version>
 							<classifier>runtime</classifier>
 							<type>jar</type>
 							<overWrite>false</overWrite>
