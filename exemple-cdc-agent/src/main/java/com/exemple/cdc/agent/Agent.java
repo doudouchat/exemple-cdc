@@ -1,11 +1,19 @@
 package com.exemple.cdc.agent;
 
 import java.lang.instrument.Instrumentation;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.Executors;
 
 import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.cassandra.service.StorageService;
+
+import com.exemple.cdc.agent.commitlog.CommitLogProcess;
+import com.exemple.cdc.agent.common.DirectoryWatcher;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -33,9 +41,29 @@ public class Agent {
         }
     }
 
-    static void startCdcAgent(String agentArgs) {
-        LOG.info("Starting CDC agent, cdc_raw_directory={}", DatabaseDescriptor.getCDCLogLocation());
+    @SneakyThrows
+    private static void startCdcAgent(String agentArgs) {
+        LOG.info("Starting CDC agent");
+
+        var cdcLogPath = Paths.get(DatabaseDescriptor.getCDCLogLocation());
+        LOG.info(cdcLogPath.toString());
+
+        var commitLogExecutor = Executors.newSingleThreadExecutor();
+        commitLogExecutor.submit(() -> process(cdcLogPath));
 
         LOG.info("CDC agent started");
+
     }
+
+    @SneakyThrows
+    private static void process(Path cdcLogPath) {
+
+        do {
+            Thread.sleep(1_000);
+        } while (StorageService.instance.getLocalHostUUID() == null);
+
+        DirectoryWatcher.onChangeOrCreateFile(cdcLogPath, 0, file -> file.getAbsolutePath().endsWith("_cdc.idx"),
+                file -> new CommitLogProcess(file).process());
+    }
+
 }

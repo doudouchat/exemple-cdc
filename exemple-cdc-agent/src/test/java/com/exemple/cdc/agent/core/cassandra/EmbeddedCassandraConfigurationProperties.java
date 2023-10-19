@@ -15,5 +15,7 @@ public class EmbeddedCassandraConfigurationProperties {
     private final String agent;
 
     private final String lib;
+    
+    private final String conf;
 
 }

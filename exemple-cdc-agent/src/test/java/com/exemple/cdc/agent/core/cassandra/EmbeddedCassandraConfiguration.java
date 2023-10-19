@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ResourceUtils;
 import org.testcontainers.containers.CassandraContainer;
+import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -22,14 +23,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class EmbeddedCassandraConfiguration {
 
-    private final EmbeddedCassandraConfigurationProperties properties;
+    private final EmbeddedCassandraConfigurationProperties cassandraProperties;
 
     @Bean
     @ServiceConnection
-    public CassandraContainer<?> embeddedServer() throws IOException {
+    public CassandraContainer<?> embeddedCassandra(KafkaContainer kafkaContainer) throws IOException {
 
-        var agent = ResourceUtils.getFile(properties.getAgent()).getAbsolutePath();
-        var lib = ResourceUtils.getFile(properties.getLib()).getAbsolutePath();
+        var agent = ResourceUtils.getFile(cassandraProperties.getAgent()).getAbsolutePath();
+        var lib = ResourceUtils.getFile(cassandraProperties.getLib()).getAbsolutePath();
+        var conf = ResourceUtils.getFile(cassandraProperties.getConf()).getAbsolutePath();
 
         var jvmExtraOpts = new StringBuffer()
                 .append("-javaagent:/tmp/lib/jacocoagent.jar")
@@ -40,11 +42,13 @@ public class EmbeddedCassandraConfiguration {
                 .append(" ")
                 .append("-javaagent:/exemple-cdc-agent.jar");
 
-        return new CassandraContainer<>("cassandra:" + properties.getVersion())
+        return new CassandraContainer<>("cassandra:" + cassandraProperties.getVersion())
+                .withNetwork(kafkaContainer.getNetwork())
                 .withExposedPorts(9042, 6300)
                 .withFileSystemBind(agent, "/exemple-cdc-agent.jar")
                 .withFileSystemBind(lib, "/tmp/lib")
-                .withConfigurationOverride("conf")
+                .withFileSystemBind(conf, "/tmp/conf")
+                .withConfigurationOverride("conf/cassandra")
                 .withEnv("JVM_EXTRA_OPTS", jvmExtraOpts.toString())
                 .waitingFor(Wait.forLogMessage(".*Startup complete.*\\n", 1))
                 .withLogConsumer(new Slf4jLogConsumer(LOG));
