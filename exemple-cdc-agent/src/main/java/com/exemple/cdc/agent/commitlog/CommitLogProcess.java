@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import org.apache.cassandra.db.commitlog.CommitLogPosition;
 import org.apache.cassandra.io.util.File;
+import org.apache.commons.io.FileUtils;
 
 import com.exemple.cdc.agent.core.commitlog.CommitLogComponent;
 import com.exemple.cdc.agent.core.commitlog.DaggerCommitLogComponent;
@@ -18,9 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class CommitLogProcess {
 
-    private static final CommitLogComponent component = DaggerCommitLogComponent.create();
+    public static final Pattern FILENAME_REGEX_PATTERN = Pattern.compile("CommitLog-\\d+-(\\d+)(\\.log|_cdc\\.idx)", Pattern.DOTALL);
 
-    private static final Pattern FILENAME_REGEX_PATTERN = Pattern.compile("CommitLog-\\d+-(\\d+)(\\.log|_cdc\\.idx)", Pattern.DOTALL);
+    private static final CommitLogComponent component = DaggerCommitLogComponent.create();
 
     private final java.io.File commitLogIndexe;
 
@@ -59,22 +60,25 @@ public class CommitLogProcess {
                 commitLogPosition = offset;
             } else {
                 LOG.debug("No movement in offset in idx file: {}", commitLogIndexe.getName());
-                commitLogPosition = null;
+                continue;
             }
 
-            if (commitLogPosition != null) {
+            commitLogReader.readCommitLogSegment(
+                    commitLogReadHandler,
+                    new File(commitLog),
+                    new CommitLogPosition(segmentId,
+                            commitLogPosition),
+                    -1, false);
 
-                commitLogReader.readCommitLogSegment(
-                        commitLogReadHandler,
-                        new File(commitLog),
-                        new CommitLogPosition(segmentId,
-                                commitLogPosition),
-                        -1, false);
-
-                offset = offsetOfEndOfLastWrittenCDCMutation;
-            }
+            offset = offsetOfEndOfLastWrittenCDCMutation;
 
         } while (!completed);
+
+        FileUtils.delete(commitLog);
+        FileUtils.delete(commitLogIndexe);
+
+        assert !commitLog.exists() : commitLog.getName() + " must be deleted";
+        assert !commitLogIndexe.exists() : commitLogIndexe.getName() + " must be deleted";
 
     }
 

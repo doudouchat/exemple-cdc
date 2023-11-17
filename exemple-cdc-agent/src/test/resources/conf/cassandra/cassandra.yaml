@@ -514,7 +514,7 @@ commitlog_sync_period: 10000ms
 # be set to at least twice the size of max_mutation_size
 #
 # Min unit: MiB
-commitlog_segment_size: 32MiB
+commitlog_segment_size: 1MiB
 
 # Compression to apply to the commit log. If omitted, the commit log
 # will be written uncompressed.  LZ4, Snappy, and Deflate compressors

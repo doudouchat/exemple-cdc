@@ -10,6 +10,11 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -33,6 +38,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame.OutputType;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.exemple.cdc.agent.commitlog.CommitLogProcess;
 import com.exemple.cdc.agent.core.AgentTestConfiguration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -135,6 +141,63 @@ class AgentIT {
                 });
             });
 
+        }
+
+    }
+
+    @Nested
+    class CreateMultiEvents {
+
+        @Test
+        void createMultiEvents() throws InterruptedException, IOException {
+
+            // Setup segmentId
+            var ls = embeddedCassandra.execInContainer("ls", "/opt/cassandra/data/cdc_raw").getStdout();
+            var logsMatcher = CommitLogProcess.FILENAME_REGEX_PATTERN.matcher(ls);
+
+            assert logsMatcher.lookingAt() : ls + " doesn't match ";
+
+            var segmentId = logsMatcher.group(1);
+
+            // when perform multiple update
+            ExecutorService executorService = new ThreadPoolExecutor(5, 1000, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+
+            for (int i = 0; i < 6000; i++) {
+                executorService.submit(() -> insertEvent(UUID.randomUUID()));
+            }
+
+            executorService.awaitTermination(10, TimeUnit.SECONDS);
+            executorService.shutdown();
+
+            // Then check logs
+            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).contains("Finished reading /opt/cassandra/data/cdc_raw/CommitLog");
+            });
+
+            // And check missing commit log
+
+            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+                var result = embeddedCassandra.execInContainer("ls", "/opt/cassandra/data/cdc_raw");
+                assertThat(result.getStdout()).doesNotContainPattern("CommitLog-\\d+-" + segmentId + ".log");
+                assertThat(result.getStdout()).doesNotContain("CommitLog-\\d+-" + segmentId + "_cdc.idx");
+
+            });
+        }
+
+        private void insertEvent(UUID id) {
+
+            session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
+                    + id.toString() + ",\n"
+                    + "'2023-12-01 13:00',\n"
+                    + "'app1',\n"
+                    + "'v1',\n"
+                    + "'CREATE_ACCOUNT',\n"
+                    + "'{\n"
+                    + "  \"email\": \"other@gmail.com\",\n"
+                    + "  \"name\": \"Doe\"\n"
+                    + "}',\n"
+                    + "'2023-12-01'\n"
+                    + ");");
         }
 
     }
