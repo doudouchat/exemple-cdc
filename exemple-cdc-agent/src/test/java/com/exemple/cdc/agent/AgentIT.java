@@ -40,12 +40,13 @@ import org.testcontainers.containers.output.OutputFrame.OutputType;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.exemple.cdc.agent.commitlog.CommitLogProcess;
 import com.exemple.cdc.agent.core.AgentTestConfiguration;
+import com.exemple.cdc.agent.core.cassandra.EmbeddedCassandraConfiguration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-@SpringBootTest(classes = AgentTestConfiguration.class)
+@SpringBootTest(classes = { EmbeddedCassandraConfiguration.class, AgentTestConfiguration.class })
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j

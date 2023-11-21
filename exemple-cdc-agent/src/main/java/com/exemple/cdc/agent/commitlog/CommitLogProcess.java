@@ -59,7 +59,7 @@ public class CommitLogProcess {
                 LOG.debug("Resume to read the partial file: {}", commitLogIndexe.getName());
                 commitLogPosition = offset;
             } else {
-                LOG.debug("No movement in offset in idx file: {}", commitLogIndexe.getName());
+                LOG.trace("No movement in offset in idx file: {}", commitLogIndexe.getName());
                 continue;
             }
 

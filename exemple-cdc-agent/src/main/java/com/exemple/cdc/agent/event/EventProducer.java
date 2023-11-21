@@ -1,6 +1,7 @@
 package com.exemple.cdc.agent.event;
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.producer.Producer;
@@ -8,6 +9,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.exemple.cdc.agent.common.CdcEvent;
 import com.exemple.cdc.agent.core.kafka.DaggerKafkaProducerComponent;
+import com.exemple.cdc.agent.core.kafka.KafkaProducerModule;
 import com.exemple.cdc.agent.core.kafka.KafkaProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -23,9 +25,19 @@ public class EventProducer {
 
     public static final String X_EVENT_TYPE = "X_Event_Type";
 
-    private static final Producer<String, JsonNode> kafkaProducer = DaggerKafkaProducerComponent.create().kafkaProducer();
+    private final Producer<String, JsonNode> kafkaProducer;
 
-    private static final KafkaProperties kafkaProperties = DaggerKafkaProducerComponent.create().kafkaProperties();
+    private final KafkaProperties kafkaProperties;
+
+    public EventProducer(String path) {
+        var component = DaggerKafkaProducerComponent.builder().kafkaProducerModule(new KafkaProducerModule(path)).build();
+        this.kafkaProducer = component.kafkaProducer();
+        this.kafkaProperties = component.kafkaProperties();
+    }
+
+    public EventProducer() {
+        this("/tmp/conf/exemple-cdc.yml");
+    }
 
     @SneakyThrows
     public void send(CdcEvent event) {
@@ -36,7 +48,12 @@ public class EventProducer {
         });
         var data = event.getData();
 
-        var productRecord = new ProducerRecord<String, JsonNode>(topic, null, event.getDate().toInstant().toEpochMilli(), null, data);
+        var productRecord = new ProducerRecord<String, JsonNode>(
+                topic,
+                null,
+                event.getDate().toInstant().toEpochMilli(),
+                UUID.randomUUID().toString(),
+                data);
         productRecord.headers()
                 .add(X_RESOURCE, resource.getBytes(StandardCharsets.UTF_8))
                 .add(X_EVENT_TYPE, event.getEventType().getBytes(StandardCharsets.UTF_8))

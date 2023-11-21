@@ -8,8 +8,8 @@ import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.ResourceUtils;
@@ -17,24 +17,21 @@ import org.testcontainers.containers.CassandraContainer;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
-import com.exemple.cdc.agent.core.cassandra.EmbeddedCassandraConfiguration;
 import com.exemple.cdc.agent.core.kafka.ConsumerKafkaConfiguration;
+import com.exemple.cdc.agent.core.kafka.EmbeddedKafkaConfiguration;
 
 import jakarta.annotation.PostConstruct;
 
 @Configuration
-@ComponentScan(basePackages = "com.exemple.cdc.agent")
-@Import({ EmbeddedCassandraConfiguration.class, ConsumerKafkaConfiguration.class })
+@Import({ EmbeddedKafkaConfiguration.class, ConsumerKafkaConfiguration.class })
 public class AgentTestConfiguration {
-
-    @Autowired
-    private CassandraContainer<?> cassandraContainer;
 
     @Autowired
     private KafkaConsumer<?, ?> consumerEvent;
 
     @Bean
-    public CqlSession session() throws IOException {
+    @ConditionalOnBean(CassandraContainer.class)
+    public CqlSession session(CassandraContainer embeddedCassandra) throws IOException {
 
         var cassandraResource = ResourceUtils.getFile("classpath:cassandra.conf");
 
@@ -42,8 +39,8 @@ public class AgentTestConfiguration {
 
         return CqlSession.builder()
                 .withConfigLoader(loader)
-                .addContactPoint(cassandraContainer.getContactPoint())
-                .withLocalDatacenter(cassandraContainer.getLocalDatacenter())
+                .addContactPoint(embeddedCassandra.getContactPoint())
+                .withLocalDatacenter(embeddedCassandra.getLocalDatacenter())
                 .build();
     }
 

@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -23,6 +24,13 @@ import lombok.extern.slf4j.Slf4j;
 @Module
 @Slf4j
 public class KafkaProducerModule {
+
+    private final String path;
+
+    @Inject
+    public KafkaProducerModule(String path) {
+        this.path = path;
+    }
 
     @Provides
     @Singleton
@@ -44,7 +52,7 @@ public class KafkaProducerModule {
     public KafkaProperties kafkaProperties() {
 
         var properties = new Yaml();
-        Map<String, Object> values = properties.load(new FileInputStream("/tmp/conf/exemple-cdc.yml"));
+        Map<String, Object> values = properties.load(new FileInputStream(path));
 
         Map<String, Object> kafkaValues = (Map<String, Object>) values.get("kafka");
 
