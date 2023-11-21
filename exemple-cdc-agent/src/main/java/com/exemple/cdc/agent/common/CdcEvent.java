@@ -14,10 +14,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.ToString;
 
+@Builder
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
 public class CdcEvent {
