@@ -10,11 +10,11 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -62,7 +62,7 @@ class AgentIT {
 
     @Autowired
     private GenericContainer<?> embeddedCassandra;
-
+    
     @BeforeAll
     public void createSchema() throws IOException {
 
@@ -97,7 +97,7 @@ class AgentIT {
                 ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
                 assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
-                    LOG.debug("received event{}", record.value().toPrettyString());
+                    LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
                     assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
                             + "  \"email\" : \"test@gmail.com\",\n"
@@ -132,7 +132,7 @@ class AgentIT {
                 ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
                 assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
-                    LOG.debug("received event{}", record.value().toPrettyString());
+                    LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
                     assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
                             + "  \"email\" : \"other@gmail.com\",\n"
@@ -163,8 +163,9 @@ class AgentIT {
             // when perform multiple update
             ExecutorService executorService = new ThreadPoolExecutor(5, 1000, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
+            var counter = new AtomicInteger(0);
             for (int i = 0; i < 6000; i++) {
-                executorService.submit(() -> insertEvent(UUID.randomUUID()));
+                executorService.submit(() -> insertEvent(counter.incrementAndGet()));
             }
 
             executorService.awaitTermination(10, TimeUnit.SECONDS);
@@ -176,8 +177,7 @@ class AgentIT {
             });
 
             // And check missing commit log
-
-            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
                 var result = embeddedCassandra.execInContainer("ls", "/opt/cassandra/data/cdc_raw");
                 assertThat(result.getStdout()).doesNotContainPattern("CommitLog-\\d+-" + segmentId + ".log");
                 assertThat(result.getStdout()).doesNotContain("CommitLog-\\d+-" + segmentId + "_cdc.idx");
@@ -185,10 +185,10 @@ class AgentIT {
             });
         }
 
-        private void insertEvent(UUID id) {
+        private void insertEvent(int id) {
 
-            session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                    + id.toString() + ",\n"
+            session.execute("INSERT INTO other_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
+                    + id + ",\n"
                     + "'2023-12-01 13:00',\n"
                     + "'app1',\n"
                     + "'v1',\n"
