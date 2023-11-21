@@ -3,3 +3,4 @@ kafka:
    timeout: 10
    topics:
       test: topic_test
+      other: topic_other
