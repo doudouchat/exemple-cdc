@@ -25,11 +25,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KafkaProducerModule {
 
-    private final String path;
+    private final Map<String, Object> kafkaProperties;
 
     @Inject
+    @SneakyThrows
     public KafkaProducerModule(String path) {
-        this.path = path;
+        Map<String, Object> properties = new Yaml().load(new FileInputStream(path));
+
+        this.kafkaProperties = (Map<String, Object>) properties.get("kafka");
+
+        LOG.info("Kafka Properties {}", kafkaProperties);
+
     }
 
     @Provides
@@ -48,20 +54,12 @@ public class KafkaProducerModule {
 
     @Provides
     @Singleton
-    @SneakyThrows
     public KafkaProperties kafkaProperties() {
 
-        var properties = new Yaml();
-        Map<String, Object> values = properties.load(new FileInputStream(path));
-
-        Map<String, Object> kafkaValues = (Map<String, Object>) values.get("kafka");
-
-        LOG.info("Kafka Properties {}", kafkaValues);
-
         return KafkaProperties.builder()
-                .boostrapServers((String) kafkaValues.get("bootstrap_servers"))
-                .timeout((int) kafkaValues.get("timeout"))
-                .topics((Map<String, String>) kafkaValues.get("topics"))
+                .boostrapServers((String) kafkaProperties.get("bootstrap_servers"))
+                .timeout((int) kafkaProperties.get("timeout"))
+                .topics((Map<String, String>) kafkaProperties.get("topics"))
                 .build();
     }
 
