@@ -13,3 +13,5 @@ cassandra:
     conf: file:${project.build.testOutputDirectory}/conf/cdc
 kafka:
    version: ${io.confluent.kafka.version}
+zookeeper:
+   version: 3.9.0

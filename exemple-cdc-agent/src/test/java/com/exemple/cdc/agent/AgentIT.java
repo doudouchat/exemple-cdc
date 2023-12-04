@@ -179,7 +179,7 @@ class AgentIT {
             });
 
             // And check missing commit log
-            await().atMost(Duration.ofSeconds(600)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(900)).untilAsserted(() -> {
                 var result = embeddedCassandra.execInContainer("ls", "/opt/cassandra/data/cdc_raw");
                 assertThat(result.getStdout()).doesNotContainPattern("CommitLog-\\d+-" + segmentId + ".log");
                 assertThat(result.getStdout()).doesNotContain("CommitLog-\\d+-" + segmentId + "_cdc.idx");

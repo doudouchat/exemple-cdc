@@ -41,6 +41,13 @@
 			<artifactId>java-driver-core</artifactId>
 		</dependency>
 
+		<!-- CURATOR -->
+
+		<dependency>
+			<groupId>org.apache.curator</groupId>
+			<artifactId>curator-recipes</artifactId>
+		</dependency>
+
 		<!-- DAGGER -->
 
 		<dependency>

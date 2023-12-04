@@ -19,11 +19,12 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.exemple.cdc.agent.core.kafka.ConsumerKafkaConfiguration;
 import com.exemple.cdc.agent.core.kafka.EmbeddedKafkaConfiguration;
+import com.exemple.cdc.agent.core.zookeeper.EmbeddedZookeeperConfiguration;
 
 import jakarta.annotation.PostConstruct;
 
 @Configuration
-@Import({ EmbeddedKafkaConfiguration.class, ConsumerKafkaConfiguration.class })
+@Import({ EmbeddedKafkaConfiguration.class, ConsumerKafkaConfiguration.class, EmbeddedZookeeperConfiguration.class })
 public class AgentTestConfiguration {
 
     @Autowired
