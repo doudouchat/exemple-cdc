@@ -77,6 +77,11 @@ public class CdcEvent {
     }
 
     @SneakyThrows
+    public String getId() {
+        return date.toInstant().toEpochMilli() + "" + data.toString();
+    }
+
+    @SneakyThrows
     private static JsonNode convertToJsonNode(Row row, ColumnMetadata column) {
         var cell = row.getCell(column);
         return MAPPER.readTree(column.type.compose(cell.buffer()).toString());

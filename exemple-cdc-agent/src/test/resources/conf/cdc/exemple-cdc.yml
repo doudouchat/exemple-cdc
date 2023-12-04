@@ -4,3 +4,9 @@ kafka:
    topics:
       test: topic_test
       other: topic_other
+zookeeper:
+   host: zookeeper_network:2181
+   session_timeout: 30000
+   connection_timeout: 10000
+   retry: 3
+   eventTTL: 60000

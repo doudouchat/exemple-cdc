@@ -119,6 +119,56 @@ class EventProducerTest {
     }
 
     @Test
+    void sendTwoEvents() throws IOException {
+
+        // Setup one event
+        var event1 = CdcEvent.builder()
+                .resource("test")
+                .eventType("UPDATE")
+                .origin("test")
+                .originVersion("v1")
+                .date(OffsetDateTime.now())
+                .data((ObjectNode) MAPPER.readTree("{\n"
+                        + "  \"email\" : \"test@gmail.com\",\n"
+                        + "  \"name\" : \"Doe\",\n"
+                        + "  \"id\" : \"2bc572fc-b6cd-4763-8ca2-6225689473b3\"\n"
+                        + "}"))
+                .build();
+
+        // And second event
+        var event2 = CdcEvent.builder()
+                .resource("test")
+                .eventType("UPDATE")
+                .origin("test")
+                .originVersion("v1")
+                .date(OffsetDateTime.now().plusSeconds(1))
+                .data((ObjectNode) MAPPER.readTree("{\n"
+                        + "  \"email\" : \"test@gmail.com\",\n"
+                        + "  \"name\" : \"Doe\",\n"
+                        + "  \"id\" : \"2bc572fc-b6cd-4763-8ca2-6225689473b3\"\n"
+                        + "}"))
+                .build();
+
+        // When perform first event
+        this.eventProducer.send(event1);
+
+        // And perform second event
+        this.eventProducer.send(event2);
+
+        // Then check event
+        var counter = new AtomicInteger();
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+
+            ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(2));
+            counter.addAndGet(records.count());
+            LOG.debug("count events {}", counter.intValue());
+            assertThat(records).isEmpty();
+        });
+        assertThat(counter.intValue()).isEqualTo(2);
+
+    }
+
+    @Test
     void sendOneEventFailsBecauseResourceIsIncorrect() throws IOException {
 
         // Setup event
@@ -177,8 +227,9 @@ class EventProducerTest {
 
             LOG.debug("count events {}", counter.intValue());
 
-            assertThat(counter.intValue()).isEqualTo(10);
+            assertThat(records).isEmpty();
         });
+        assertThat(counter.intValue()).isEqualTo(1);
 
     }
 
