@@ -1,6 +1,7 @@
 package com.exemple.cdc.agent.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.awaitility.Awaitility.await;
 
 import java.io.FileWriter;
@@ -102,6 +103,31 @@ class EventProducerTest {
                         + "}"));
             });
         });
+
+    }
+
+    @Test
+    void sendOneEventFailsBecauseResourceIsIncorrect() throws IOException {
+
+        // Setup event
+        var event = CdcEvent.builder()
+                .resource("unknown")
+                .eventType("CREATION")
+                .origin("test")
+                .originVersion("v1")
+                .date(OffsetDateTime.now())
+                .data((ObjectNode) MAPPER.readTree("{\n"
+                        + "  \"email\" : \"test@gmail.com\",\n"
+                        + "  \"name\" : \"Doe\",\n"
+                        + "  \"id\" : \"e143f715-f14e-44b4-90f1-47246661eb7d\"\n"
+                        + "}"))
+                .build();
+
+        // When perform
+        var throwable = catchThrowable(() -> this.eventProducer.send(event));
+
+        // Then check none exception
+        assertThat(throwable).isInstanceOf(IllegalStateException.class).hasMessage("unknown has not any topic");
 
     }
 
