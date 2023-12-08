@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -50,21 +52,32 @@ class EventProducerTest {
     @Autowired
     private KafkaContainer kafkaContainer;
 
+    @Autowired
+    private GenericContainer embeddedZookeeper;
+
     @BeforeAll
     public void createSchema() throws IOException {
 
-        Map<String, Object> data = Map.of(
+        Map<String, Object> kafka = Map.of(
                 "bootstrap_servers", "localhost:" + kafkaContainer.getMappedPort(9093),
                 "timeout", 10,
                 "topics", Map.of("test", "topic_test"));
+
+        Map<String, Object> zookeeper = Map.of(
+                "host", "localhost:" + embeddedZookeeper.getMappedPort(2181),
+                "session_timeout", 30000,
+                "connection_timeout", 10000,
+                "retry", 3,
+                "eventTTL", 10000);
 
         var options = new DumperOptions();
         options.setIndent(2);
         options.setPrettyFlow(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
         var yaml = new Yaml(options);
         var writer = new FileWriter("target/test-classes/test.yml");
-        yaml.dump(Map.of("kafka", data), writer);
+        yaml.dump(Map.of("kafka", kafka, "zookeeper", zookeeper), writer);
 
         this.eventProducer = new EventProducer("target/test-classes/test.yml");
     }
@@ -132,7 +145,7 @@ class EventProducerTest {
     }
 
     @Test
-    void sendMultiEvents() throws IOException {
+    void sendMultiEvents() throws IOException, InterruptedException {
 
         // Setup event
         var event = CdcEvent.builder()
@@ -149,15 +162,23 @@ class EventProducerTest {
                 .build();
 
         // When perform
-        ExecutorService executorService = new ThreadPoolExecutor(10, 1000, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+        var executorService = new ThreadPoolExecutor(5, 100, 1000, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
         for (int i = 0; i < 10; i++) {
             executorService.submit(() -> eventProducer.send(event));
         }
+        executorService.awaitTermination(5, TimeUnit.SECONDS);
+        executorService.shutdown();
 
         // Then check event
-        ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
+        var counter = new AtomicInteger();
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
-            assertThat(records).hasSizeGreaterThan(1);
+
+            ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(2));
+            counter.addAndGet(records.count());
+
+            LOG.debug("count events {}", counter.intValue());
+
+            assertThat(counter.intValue()).isEqualTo(10);
         });
 
     }
