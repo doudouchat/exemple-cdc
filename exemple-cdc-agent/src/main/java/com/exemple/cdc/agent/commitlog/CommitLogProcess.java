@@ -1,15 +1,15 @@
 package com.exemple.cdc.agent.commitlog;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.regex.Pattern;
 
 import org.apache.cassandra.db.commitlog.CommitLogPosition;
 import org.apache.cassandra.io.util.File;
-import org.apache.commons.io.FileUtils;
 
 import com.exemple.cdc.agent.core.commitlog.CommitLogComponent;
 import com.exemple.cdc.agent.core.commitlog.DaggerCommitLogComponent;
-import com.google.common.io.Files;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -74,18 +74,17 @@ public class CommitLogProcess {
 
         } while (!completed);
 
-        FileUtils.delete(commitLog);
-        FileUtils.delete(commitLogIndexe);
+        Files.delete(commitLog.toPath());
+        Files.delete(commitLogIndexe.toPath());
 
         assert !commitLog.exists() : commitLog.getName() + " must be deleted";
         assert !commitLogIndexe.exists() : commitLogIndexe.getName() + " must be deleted";
 
     }
 
-    @SneakyThrows
-    private void parse() {
+    private void parse() throws IOException {
 
-        var lines = Files.readLines(commitLogIndexe, StandardCharsets.UTF_8);
+        var lines = Files.readAllLines(commitLogIndexe.toPath(), StandardCharsets.UTF_8);
 
         if (!lines.isEmpty()) {
             this.offsetOfEndOfLastWrittenCDCMutation = Integer.valueOf(lines.get(0));
