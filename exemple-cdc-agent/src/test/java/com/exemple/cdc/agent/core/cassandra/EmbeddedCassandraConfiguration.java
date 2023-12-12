@@ -12,6 +12,7 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.MountableFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,9 +46,9 @@ public class EmbeddedCassandraConfiguration {
         return new CassandraContainer<>("cassandra:" + cassandraProperties.getVersion())
                 .withNetwork(kafkaContainer.getNetwork())
                 .withExposedPorts(9042, 6300)
-                .withFileSystemBind(agent, "/exemple-cdc-agent.jar")
-                .withFileSystemBind(lib, "/tmp/lib")
-                .withFileSystemBind(conf, "/tmp/conf")
+                .withCopyToContainer(MountableFile.forHostPath(agent), "/exemple-cdc-agent.jar")
+                .withCopyToContainer(MountableFile.forHostPath(lib), "/tmp/lib")
+                .withCopyToContainer(MountableFile.forHostPath(conf), "/tmp/conf")
                 .withConfigurationOverride("conf/cassandra")
                 .withEnv("JVM_EXTRA_OPTS", jvmExtraOpts.toString())
                 .waitingFor(Wait.forLogMessage(".*Startup complete.*\\n", 1))
