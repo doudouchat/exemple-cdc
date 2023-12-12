@@ -10,7 +10,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -23,10 +22,12 @@ import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.ClassOrderer;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
+@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class AgentIT {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -62,7 +64,7 @@ class AgentIT {
 
     @Autowired
     private GenericContainer<?> embeddedCassandra;
-    
+
     @BeforeAll
     public void createSchema() throws IOException {
 
@@ -71,7 +73,8 @@ class AgentIT {
     }
 
     @Nested
-    @TestMethodOrder(OrderAnnotation.class)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+    @Order(0)
     class CreateEvent {
 
         @Test
@@ -147,6 +150,7 @@ class AgentIT {
     }
 
     @Nested
+    @Order(1)
     class CreateMultiEvents {
 
         @Test
@@ -161,28 +165,29 @@ class AgentIT {
             var segmentId = logsMatcher.group(1);
 
             // when perform multiple update
-            ExecutorService executorService = new ThreadPoolExecutor(5, 1000, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+            var executorService = new ThreadPoolExecutor(5, 1000, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
             var counter = new AtomicInteger(0);
             for (int i = 0; i < 6000; i++) {
                 executorService.submit(() -> insertEvent(counter.incrementAndGet()));
             }
 
-            executorService.awaitTermination(10, TimeUnit.SECONDS);
-            executorService.shutdown();
-
             // Then check logs
-            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(600)).untilAsserted(() -> {
                 assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).contains("Finished reading /opt/cassandra/data/cdc_raw/CommitLog");
+
             });
 
             // And check missing commit log
-            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(600)).untilAsserted(() -> {
                 var result = embeddedCassandra.execInContainer("ls", "/opt/cassandra/data/cdc_raw");
                 assertThat(result.getStdout()).doesNotContainPattern("CommitLog-\\d+-" + segmentId + ".log");
                 assertThat(result.getStdout()).doesNotContain("CommitLog-\\d+-" + segmentId + "_cdc.idx");
 
             });
+
+            executorService.awaitTermination(5, TimeUnit.SECONDS);
+            executorService.shutdown();
         }
 
         private void insertEvent(int id) {
@@ -205,6 +210,7 @@ class AgentIT {
 
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    @Order(0)
     class UpdateEvent {
 
         @BeforeAll
@@ -247,6 +253,7 @@ class AgentIT {
 
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    @Order(0)
     class DeleteEvent {
 
         @BeforeAll

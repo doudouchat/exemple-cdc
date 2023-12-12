@@ -74,6 +74,8 @@ public class CommitLogProcess {
 
         } while (!completed);
 
+        LOG.debug("Complete idx file: {}", commitLogIndexe.getName());
+
         Files.delete(commitLog.toPath());
         Files.delete(commitLogIndexe.toPath());
 
