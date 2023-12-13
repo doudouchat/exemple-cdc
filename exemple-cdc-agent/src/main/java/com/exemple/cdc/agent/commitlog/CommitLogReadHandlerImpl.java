@@ -8,16 +8,17 @@ import org.apache.cassandra.db.partitions.PartitionUpdate;
 import org.apache.cassandra.db.rows.Row;
 
 import com.exemple.cdc.agent.common.CdcEvent;
-import com.exemple.cdc.agent.core.event.DaggerEventProducerComponent;
 import com.exemple.cdc.agent.event.EventProducer;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor
 public class CommitLogReadHandlerImpl implements CommitLogReadHandler {
 
-    private EventProducer eventProducer = DaggerEventProducerComponent.create().eventProducer();
+    private final EventProducer eventProducer;
 
     @Override
     public boolean shouldSkipSegmentOnError(CommitLogReadException exception) {

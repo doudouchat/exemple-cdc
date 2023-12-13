@@ -6,10 +6,9 @@ import java.nio.file.Files;
 import java.util.regex.Pattern;
 
 import org.apache.cassandra.db.commitlog.CommitLogPosition;
+import org.apache.cassandra.db.commitlog.CommitLogReadHandler;
+import org.apache.cassandra.db.commitlog.CommitLogReader;
 import org.apache.cassandra.io.util.File;
-
-import com.exemple.cdc.agent.core.commitlog.CommitLogComponent;
-import com.exemple.cdc.agent.core.commitlog.DaggerCommitLogComponent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -21,7 +20,9 @@ public class CommitLogProcess {
 
     public static final Pattern FILENAME_REGEX_PATTERN = Pattern.compile("CommitLog-\\d+-(\\d+)(\\.log|_cdc\\.idx)", Pattern.DOTALL);
 
-    private static final CommitLogComponent component = DaggerCommitLogComponent.create();
+    private final CommitLogReader commitLogReader;
+
+    private final CommitLogReadHandler commitLogReadHandler;
 
     private final java.io.File commitLogIndexe;
 
@@ -35,17 +36,17 @@ public class CommitLogProcess {
 
     private Integer offset;
 
-    public CommitLogProcess(java.io.File commitLogIndexe) {
+    public CommitLogProcess(java.io.File commitLogIndexe, CommitLogReader commitLogReader, CommitLogReadHandler commitLogReadHandler) {
         this.commitLogIndexe = commitLogIndexe;
         this.commitLog = parseCommitLogName(commitLogIndexe);
         this.segmentId = parseSegmentId(commitLog);
+
+        this.commitLogReader = commitLogReader;
+        this.commitLogReadHandler = commitLogReadHandler;
     }
 
     @SneakyThrows
     public void process() {
-
-        var commitLogReader = component.commitLogReader();
-        var commitLogReadHandler = component.commitLogReadHandler();
 
         do {
 

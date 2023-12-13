@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Builder
-@Getter 
+@Getter
 public class KafkaProperties {
 
     private final String boostrapServers;

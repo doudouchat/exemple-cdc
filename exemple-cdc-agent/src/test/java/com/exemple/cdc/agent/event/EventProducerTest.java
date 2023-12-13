@@ -29,6 +29,8 @@ import org.yaml.snakeyaml.Yaml;
 
 import com.exemple.cdc.agent.common.CdcEvent;
 import com.exemple.cdc.agent.core.AgentTestConfiguration;
+import com.exemple.cdc.agent.core.kafka.KafkaProducerModule;
+import com.exemple.cdc.agent.core.zookeeper.ZookeeperClientModule;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -78,7 +80,14 @@ class EventProducerTest {
         var writer = new FileWriter("target/test-classes/test.yml");
         yaml.dump(Map.of("kafka", kafka, "zookeeper", zookeeper), writer);
 
-        this.eventProducer = new EventProducer("target/test-classes/test.yml");
+        var zookeeperClientModule = new ZookeeperClientModule("target/test-classes/test.yml");
+        var kafkaProducerModule = new KafkaProducerModule("target/test-classes/test.yml");
+
+        this.eventProducer = new EventProducer(
+                kafkaProducerModule.kafkaProducer(),
+                kafkaProducerModule.kafkaProperties(),
+                zookeeperClientModule.zookeeperClient(),
+                zookeeperClientModule.zookeeperProperties());
     }
 
     @Test
