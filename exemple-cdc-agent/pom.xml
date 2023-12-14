@@ -162,21 +162,42 @@
 				<executions>
 					<execution>
 						<phase>package</phase>
+						<id>main</id>
 						<goals>
 							<goal>single</goal>
 						</goals>
+						<configuration>
+							<archive>
+								<manifestEntries>
+									<Premain-Class>com.exemple.cdc.agent.Agent</Premain-Class>
+								</manifestEntries>
+							</archive>
+							<descriptors>
+								<descriptor>src/assembly/agent-assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+					<execution>
+						<phase>package</phase>
+						<id>mock</id>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<archive>
+								<manifestEntries>
+									<Premain-Class>com.exemple.cdc.agent.AgentMock</Premain-Class>
+								</manifestEntries>
+							</archive>
+							<finalName>agent-mock</finalName>
+							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+							<descriptors>
+								<descriptor>src/test/resources/assembly/agent-assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Premain-Class>com.exemple.cdc.agent.Agent</Premain-Class>
-						</manifestEntries>
-					</archive>
-					<descriptors>
-						<descriptor>src/assembly/agent-assembly.xml</descriptor>
-					</descriptors>
-				</configuration>
+
 			</plugin>
 
 			<!-- JACOCO -->

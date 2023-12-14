@@ -16,14 +16,3 @@ CREATE TABLE IF NOT EXISTS test_event(
 	version text,
 	PRIMARY KEY ((id), date)
 ) WITH cdc=true;
-
-CREATE TABLE IF NOT EXISTS other_event( 
-	id int,
-	date timestamp,
-	local_date date,
-	data text,
-	event_type text,
-	application text,
-	version text,
-	PRIMARY KEY ((id), date)
-) WITH cdc=true;
