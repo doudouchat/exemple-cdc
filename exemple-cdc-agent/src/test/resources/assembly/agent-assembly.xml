@@ -11,7 +11,16 @@
 			<outputDirectory>/</outputDirectory>
 			<useProjectArtifact>true</useProjectArtifact>
 			<unpack>true</unpack>
-			<scope>runtime</scope>
+			<scope>test</scope>
 		</dependencySet>
 	</dependencySets>
+	<fileSets>
+		<fileSet>
+			<outputDirectory>/</outputDirectory>
+			<directory>${project.build.testOutputDirectory}</directory>
+			<includes>
+				<include>com/exemple/cdc/agent/AgentMock.class</include>
+			</includes>
+		</fileSet>
+	</fileSets>
 </assembly>
