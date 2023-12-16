@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.ResourceUtils;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame.OutputType;
@@ -42,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest(classes = { EmbeddedCassandraConfiguration.class, AgentTestConfiguration.class })
 @ActiveProfiles("test")
+@TestPropertySource(properties = "cassandra.agent=classpath:agent-exec.jar")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class AgentIT {

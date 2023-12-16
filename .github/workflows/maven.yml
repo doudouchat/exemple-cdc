@@ -35,7 +35,7 @@ jobs:
            plugin_repositories: '[{ "id": "repository.spring.milestone", "url": "https://repo.spring.io/milestone" }]'
       -  uses: actions/checkout@v3
       -  name: Build with Maven
-         run: mvn --batch-mode clean verify -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+         run: mvn --batch-mode clean verify -Pcdc -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
       -  uses: codecov/codecov-action@v3
       -  name: Analyse
          env:

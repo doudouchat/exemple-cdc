@@ -142,19 +142,6 @@
 
 		<plugins>
 
-			<!-- JAR -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Premain-Class>com.exemple.cdc.core.Agent</Premain-Class>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-
 			<!-- ASSEMBLY -->
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -172,8 +159,10 @@
 									<Premain-Class>com.exemple.cdc.core.Agent</Premain-Class>
 								</manifestEntries>
 							</archive>
+							<finalName>agent</finalName>
+							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
 							<descriptors>
-								<descriptor>src/assembly/agent-assembly.xml</descriptor>
+								<descriptor>src/test/resources/assembly/agent-assembly.xml</descriptor>
 							</descriptors>
 						</configuration>
 					</execution>
@@ -192,7 +181,7 @@
 							<finalName>agent-mock</finalName>
 							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
 							<descriptors>
-								<descriptor>src/test/resources/assembly/agent-assembly.xml</descriptor>
+								<descriptor>src/test/resources/assembly/agent-mock-assembly.xml</descriptor>
 							</descriptors>
 						</configuration>
 					</execution>

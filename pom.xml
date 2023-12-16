@@ -8,6 +8,7 @@
 	<modules>
 		<module>exemple-cdc-core</module>
 		<module>jacoco-report</module>
+		<module>exemple-cdc-agent</module>
 	</modules>
 
 	<properties>
@@ -307,6 +308,13 @@
 					<groupId>io.fabric8</groupId>
 					<artifactId>docker-maven-plugin</artifactId>
 					<version>0.42.0</version>
+				</plugin>
+
+				<!-- HELPER -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>3.5.0</version>
 				</plugin>
 
 			</plugins>

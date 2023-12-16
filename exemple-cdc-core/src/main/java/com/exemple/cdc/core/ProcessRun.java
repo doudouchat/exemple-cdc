@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 @RequiredArgsConstructor
-public class AgentProcess {
+public class ProcessRun {
 
     private final Path cdcLogPath;
 
@@ -25,7 +25,7 @@ public class AgentProcess {
 
     private final CommitLogReadHandler commitLogReadHandler;
 
-    public AgentProcess(Path cdcLogPath, EventProducer eventProducer) {
+    public ProcessRun(Path cdcLogPath, EventProducer eventProducer) {
         this.cdcLogPath = cdcLogPath;
         var component = DaggerCommitLogComponent.builder().commitLogModule(new CommitLogModule(eventProducer)).build();
         commitLogReader = component.commitLogReader();

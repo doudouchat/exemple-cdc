@@ -19,7 +19,7 @@
 			<outputDirectory>/</outputDirectory>
 			<directory>${project.build.testOutputDirectory}</directory>
 			<includes>
-				<include>com/exemple/cdc/core/Agent.class</include>
+				<include>com/exemple/cdc/core/AgentMock.class</include>
 			</includes>
 		</fileSet>
 	</fileSets>
