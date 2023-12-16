@@ -1,10 +1,11 @@
-package com.exemple.cdc.core;
+package com.exemple.cdc.agent;
 
 import java.lang.instrument.Instrumentation;
 import java.nio.file.Paths;
 
 import org.apache.cassandra.config.DatabaseDescriptor;
 
+import com.exemple.cdc.core.ProcessRun;
 import com.exemple.cdc.core.configuration.event.DaggerEventProducerComponent;
 import com.exemple.cdc.core.configuration.event.EventProducerModule;
 
@@ -43,7 +44,7 @@ public class Agent {
                     .build()
                     .eventProducer();
 
-            var agentProcess = new AgentProcess(cdcLogPath, eventProducer);
+            var agentProcess = new ProcessRun(cdcLogPath, eventProducer);
             agentProcess.start();
 
             LOG.info("CDC agent started");
