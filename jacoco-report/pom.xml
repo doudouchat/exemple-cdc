@@ -20,7 +20,7 @@
 
 		<dependency>
 			<groupId>exemple</groupId>
-			<artifactId>exemple-cdc-agent</artifactId>
+			<artifactId>exemple-cdc-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
