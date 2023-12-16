@@ -16,7 +16,7 @@
 
 	<dependencies>
 
-		<!-- AGENT -->
+		<!-- CORE -->
 
 		<dependency>
 			<groupId>exemple</groupId>
