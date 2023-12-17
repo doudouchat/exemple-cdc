@@ -14,6 +14,51 @@
 
 	</properties>
 
+	<dependencyManagement>
+
+		<dependencies>
+
+			<dependency>
+				<groupId>io.cucumber</groupId>
+				<artifactId>cucumber-java</artifactId>
+				<version>7.13.0</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>io.cucumber</groupId>
+				<artifactId>cucumber-spring</artifactId>
+				<version>7.13.0</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>io.cucumber</groupId>
+				<artifactId>cucumber-junit-platform-engine</artifactId>
+				<version>7.13.0</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- JUNIT PLATEFORM -->
+
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-suite-api</artifactId>
+				<version>1.10.0</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-suite-engine</artifactId>
+				<version>1.10.0</version>
+				<scope>test</scope>
+			</dependency>
+
+		</dependencies>
+
+	</dependencyManagement>
+
 	<dependencies>
 
 		<!-- CORE -->
@@ -27,6 +72,49 @@
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-all</artifactId>
+		</dependency>
+
+		<!-- TEST -->
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.vaadin.external.google</groupId>
+					<artifactId>android-json</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- CUCUMBER -->
+
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-java</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-spring</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-junit-platform-engine</artifactId>
+		</dependency>
+
+		<!-- JUNIT PLATEFORM -->
+
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-suite-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-suite-engine</artifactId>
 		</dependency>
 
 	</dependencies>
@@ -290,6 +378,30 @@
 								<id>stop_all</id>
 								<goals>
 									<goal>stop</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>it</id>
+
+			<build>
+
+				<plugins>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>integration-test</goal>
+									<goal>verify</goal>
 								</goals>
 							</execution>
 						</executions>
