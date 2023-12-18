@@ -211,21 +211,37 @@
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>dump</id>
+								<id>dump-cassandra-1</id>
 								<goals>
 									<goal>dump</goal>
 								</goals>
 								<configuration>
 									<address>127.0.0.1</address>
 									<port>6300</port>
-									<destFile>${project.build.directory}/jacoco-it.exec</destFile>
+									<destFile>${project.build.directory}/jacoco-it-cassandra-1.exec</destFile>
 								</configuration>
 							</execution>
 							<execution>
-								<id>report-integration</id>
+								<id>dump-cassandra-2</id>
 								<goals>
-									<goal>report-integration</goal>
+									<goal>dump</goal>
 								</goals>
+								<configuration>
+									<address>127.0.0.1</address>
+									<port>6301</port>
+									<destFile>${project.build.directory}/jacoco-it-cassandra-2.exec</destFile>
+								</configuration>
+							</execution>
+							<execution>
+								<id>report-sonar</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>report-aggregate</goal>
+								</goals>
+								<configuration>
+									<includeCurrentProject>true</includeCurrentProject>
+									<outputDirectory>${project.reporting.outputDirectory}/jacoco-it</outputDirectory>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
@@ -326,7 +342,7 @@
 								</configuration>
 							</execution>
 							<execution>
-								<id>start_cassandra</id>
+								<id>start_cassandra_1</id>
 								<goals>
 									<goal>start</goal>
 									<goal>copy</goal>
@@ -344,6 +360,8 @@
 												<env>
 													<JVM_OPTS>-Dcassandra.skip_wait_for_gossip_to_settle=0 -Dcassandra.initial_token=0</JVM_OPTS>
 													<JVM_EXTRA_OPTS>-javaagent:/tmp/lib/jacocoagent.jar=includes=com.exemple.cdc.*,output=tcpserver,address=*,classdumpdir=/tmp/agent/source -javaagent:/exemple-cdc-agent.jar</JVM_EXTRA_OPTS>
+													<CASSANDRA_CLUSTER_NAME>cassandra-cluster-it</CASSANDRA_CLUSTER_NAME>
+													<CASSANDRA_SEEDS>172.17.0.4</CASSANDRA_SEEDS>
 												</env>
 												<volumes>
 													<bind>
@@ -370,6 +388,48 @@
 													</entry>
 												</entries>
 											</copy>
+										</image>
+									</images>
+								</configuration>
+							</execution>
+							<execution>
+								<id>start_cassandra_2</id>
+								<goals>
+									<goal>start</goal>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<images>
+										<image>
+											<name>cassandra:${cassandra.version}</name>
+											<alias>cassandra</alias>
+											<run>
+												<ports>
+													<port>6301:6300</port>
+												</ports>
+												<env>
+													<JVM_OPTS>-Dcassandra.skip_wait_for_gossip_to_settle=0 -Dcassandra.initial_token=2</JVM_OPTS>
+													<JVM_EXTRA_OPTS>-javaagent:/tmp/lib/jacocoagent.jar=includes=com.exemple.cdc.*,output=tcpserver,address=*,classdumpdir=/tmp/agent/source -javaagent:/exemple-cdc-agent.jar</JVM_EXTRA_OPTS>
+													<CASSANDRA_CLUSTER_NAME>cassandra-cluster-it</CASSANDRA_CLUSTER_NAME>
+													<CASSANDRA_SEEDS>172.17.0.4</CASSANDRA_SEEDS>
+												</env>
+												<volumes>
+													<bind>
+														<volume>${project.build.directory}/${project.artifactId}-${project.version}-exec.jar:/exemple-cdc-agent.jar</volume>
+														<volume>${project.build.testOutputDirectory}/conf/cdc:/tmp/conf</volume>
+														<volume>${project.build.testOutputDirectory}/conf/cassandra/cassandra.yaml:/etc/cassandra/cassandra.yaml</volume>
+														<volume>${project.build.testOutputDirectory}/conf/cassandra/logback.xml:/etc/cassandra/logback.xml</volume>
+														<volume>${project.build.directory}/lib:/tmp/lib</volume>
+													</bind>
+												</volumes>
+												<wait>
+													<log>(?s)Startup complete</log>
+													<time>90000</time>
+												</wait>
+												<log>
+													<date>default</date>
+												</log>
+											</run>
 										</image>
 									</images>
 								</configuration>
