@@ -3,8 +3,8 @@ Feature: receive event
   Background: 
   	Given exec script
   	  """
-  	   CREATE KEYSPACE IF NOT EXISTS test_keyspace
-  		 WITH REPLICATION = {'class' : 'NetworkTopologyStrategy','datacenter1' : 1};
+  	  CREATE KEYSPACE IF NOT EXISTS test_keyspace
+  	  WITH REPLICATION = {'class' : 'NetworkTopologyStrategy','datacenter1' : 2};
   		"""
   	And exec script
   		"""
