@@ -140,6 +140,46 @@ class AgentIT {
 
         }
 
+        @Test
+        @Order(3)
+        void createEventInBatch() {
+
+            // When perform
+            session.execute("BEGIN BATCH "
+                    + "INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
+                    + "547700ac-824e-45f4-a6ee-35773259a8c3,\n"
+                    + "'2023-12-01 12:00',\n"
+                    + "'app1',\n"
+                    + "'v1',\n"
+                    + "'CREATE_ACCOUNT',\n"
+                    + "'{\n"
+                    + "  \"email\": \"test@gmail.com\",\n"
+                    + "  \"name\": \"Doe\"\n"
+                    + "}',\n"
+                    + "'2023-12-01'\n"
+                    + ");\n"
+                    + "INSERT INTO test_other (id) VALUES (\n"
+                    + "547700ac-824e-45f4-a6ee-35773259a8c3\n"
+                    + ");\n"
+                    + "APPLY BATCH");
+
+            // Then check event
+            await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+                ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
+                assertThat(records.iterator()).toIterable().last().satisfies(record -> {
+
+                    LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
+
+                    assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
+                            + "  \"email\" : \"test@gmail.com\",\n"
+                            + "  \"name\" : \"Doe\",\n"
+                            + "  \"id\" : \"547700ac-824e-45f4-a6ee-35773259a8c3\"\n"
+                            + "}"));
+                });
+            });
+
+        }
+
     }
 
     @Nested

@@ -34,11 +34,9 @@ public class CommitLogReadHandlerImpl implements CommitLogReadHandler {
     @Override
     public void handleMutation(Mutation mutation, int size, int entryLocation, CommitLogDescriptor descriptor) {
 
-        if (!mutation.trackedByCDC()) {
-            return;
-        }
-
-        mutation.getPartitionUpdates().forEach((PartitionUpdate modification) -> process(descriptor, modification));
+        mutation.getPartitionUpdates().stream()
+                .filter((PartitionUpdate modification) -> modification.metadata().params.cdc)
+                .forEach((PartitionUpdate modification) -> process(descriptor, modification));
 
     }
 
@@ -56,6 +54,7 @@ public class CommitLogReadHandlerImpl implements CommitLogReadHandler {
                 continue;
             }
 
+            LOG.trace("process {} {}", modification.metadata(), row);
             var event = new CdcEvent(row, modification);
             eventProducer.send(event);
 
