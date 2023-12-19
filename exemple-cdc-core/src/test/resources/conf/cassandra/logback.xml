@@ -9,7 +9,8 @@
 
 	<logger name="org.apache.cassandra.service.CassandraDaemon" level="INFO" />
 	<logger name="org.apache.cassandra.db.commitlog.CommitLogReader" level="INFO" />
-	<logger name="com.exemple" level="DEBUG"/>
+	<logger name="com.exemple.cdc.core.event" level="TRACE" />
+	<logger name="com.exemple" level="DEBUG" />
 
 	<!-- Niveau general pour l'application -->
 

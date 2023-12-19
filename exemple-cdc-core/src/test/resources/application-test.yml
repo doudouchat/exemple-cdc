@@ -3,7 +3,7 @@ logging:
       console: "%d %-5p: %C - %m%n"
    level:
       root: WARN
-      com.exemple.cdc: DEBUG
+      com.exemple.cdc: TRACE
       com.datastax.oss.driver: INFO
       org.kafka: WARN
 cassandra:

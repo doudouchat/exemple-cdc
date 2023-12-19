@@ -16,3 +16,8 @@ CREATE TABLE IF NOT EXISTS test_event(
 	version text,
 	PRIMARY KEY ((id), date)
 ) WITH cdc=true;
+
+CREATE TABLE IF NOT EXISTS test_other( 
+	id UUID,
+	PRIMARY KEY (id)
+);

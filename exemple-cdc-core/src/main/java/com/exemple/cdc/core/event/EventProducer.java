@@ -20,8 +20,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
+@Slf4j
 public class EventProducer {
 
     public static final String X_ORIGIN = "X_Origin";
@@ -71,6 +73,8 @@ public class EventProducer {
                             .add(X_EVENT_TYPE, event.getEventType().getBytes(StandardCharsets.UTF_8))
                             .add(X_ORIGIN, event.getOrigin().getBytes(StandardCharsets.UTF_8))
                             .add(X_ORIGIN_VERSION, event.getOriginVersion().getBytes(StandardCharsets.UTF_8));
+
+                    LOG.trace("Send event {}", productRecord);
 
                     kafkaProducer.send(productRecord).get(kafkaProperties.getTimeout(), TimeUnit.SECONDS);
 
