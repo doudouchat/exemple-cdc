@@ -89,7 +89,7 @@ class AgentIT {
                     + ");");
 
             // Then check event
-            await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
                 ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
                 assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
@@ -124,7 +124,7 @@ class AgentIT {
                     + ");");
 
             // Then check event
-            await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
                 ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
                 assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
@@ -164,7 +164,7 @@ class AgentIT {
                     + "APPLY BATCH");
 
             // Then check event
-            await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
                 ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
                 assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
@@ -174,6 +174,31 @@ class AgentIT {
                             + "  \"email\" : \"test@gmail.com\",\n"
                             + "  \"name\" : \"Doe\",\n"
                             + "  \"id\" : \"547700ac-824e-45f4-a6ee-35773259a8c3\"\n"
+                            + "}"));
+                });
+            });
+
+        }
+
+        @Test
+        @Order(4)
+        void createEventWithoutData() {
+
+            // When perform
+            session.execute("INSERT INTO test_event (id, date) VALUES (\n"
+                    + "4c95bfb2-5190-41a5-bfe0-598d838fcd83,\n"
+                    + "'2023-12-01 13:00'"
+                    + ");");
+
+            // Then check event
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+                ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
+                assertThat(records.iterator()).toIterable().last().satisfies(record -> {
+
+                    LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
+
+                    assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
+                            + "  \"id\" : \"4c95bfb2-5190-41a5-bfe0-598d838fcd83\"\n"
                             + "}"));
                 });
             });

@@ -38,12 +38,12 @@ public class CdcEvent {
 
     public CdcEvent(Row row, PartitionUpdate modification) {
 
-        data = modification.metadata().columns().stream()
+        data = row.columns().stream()
                 .filter((ColumnMetadata column) -> "data".equals(column.name.toCQLString()))
                 .findFirst()
                 .map((ColumnMetadata column) -> convertToJsonNode(row, column))
                 .map(ObjectNode.class::cast)
-                .orElseThrow();
+                .orElseGet(MAPPER::createObjectNode);
 
         modification.metadata().partitionKeyColumns().forEach((ColumnMetadata column) -> data.set(column.name.toCQLString(),
                 MAPPER.convertValue(column.type.compose(modification.partitionKey().getKey()), JsonNode.class)));
@@ -54,23 +54,23 @@ public class CdcEvent {
                     return OffsetDateTime.ofInstant(Instant.ofEpochMilli(datetime), ZoneId.systemDefault());
                 }).orElseThrow();
 
-        originVersion = modification.metadata().columns().stream()
+        originVersion = row.columns().stream()
                 .filter((ColumnMetadata column) -> "version".equals(column.name.toCQLString()))
                 .findFirst()
                 .map((ColumnMetadata column) -> convertToString(row, column))
-                .orElseThrow();
+                .orElse("");
 
-        origin = modification.metadata().columns().stream()
+        origin = row.columns().stream()
                 .filter((ColumnMetadata column) -> "application".equals(column.name.toCQLString()))
                 .findFirst()
                 .map((ColumnMetadata column) -> convertToString(row, column))
-                .orElseThrow();
+                .orElse("");
 
-        eventType = modification.metadata().columns().stream()
+        eventType = row.columns().stream()
                 .filter((ColumnMetadata column) -> "event_type".equals(column.name.toCQLString()))
                 .findFirst()
                 .map((ColumnMetadata column) -> convertToString(row, column))
-                .orElseThrow();
+                .orElse("");
 
         resource = modification.metadata().name.replace("_event", "").toUpperCase(Locale.getDefault());
 
