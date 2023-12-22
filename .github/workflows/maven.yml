@@ -42,4 +42,10 @@ jobs:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
          run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.organization=doudouchat -Dsonar.projectKey=doudouchat_exemple-cdc -Dsonar.host.url=https://sonarcloud.io -Dsonar.java.jdkHome=${JAVA_HOME_11_X64}
+      -  name: display logs cassandra 1
+         if: ${{ always() }}
+         run: cat exemple-cdc-agent/target/.logs/cassandra_1/archive/*.log
+      -  name: display logs cassandra 2
+         if: ${{ always() }}
+         run: cat exemple-cdc-agent/target/.logs/cassandra_2/archive/*.log
       -  uses: codecov/codecov-action@v3
