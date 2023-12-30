@@ -136,30 +136,27 @@
 				</configuration>
 			</plugin>
 
-			<!-- ASSEMBLY -->
+			<!-- SHADE PLUGIN -->
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.6.0</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
 				<executions>
 					<execution>
 						<phase>package</phase>
-						<id>main</id>
 						<goals>
-							<goal>single</goal>
+							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<archive>
-								<manifestEntries>
-									<Premain-Class>com.exemple.cdc.agent.Agent</Premain-Class>
-								</manifestEntries>
-							</archive>
-							<descriptors>
-								<descriptor>src/assembly/agent-assembly.xml</descriptor>
-							</descriptors>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<manifestEntries>
+										<Premain-Class>com.exemple.cdc.agent.Agent</Premain-Class>
+									</manifestEntries>
+								</transformer>
+							</transformers>
 						</configuration>
 					</execution>
 				</executions>
-
 			</plugin>
 
 		</plugins>
@@ -365,7 +362,7 @@
 												</env>
 												<volumes>
 													<bind>
-														<volume>${project.build.directory}/${project.artifactId}-${project.version}-exec.jar:/exemple-cdc-agent.jar</volume>
+														<volume>${project.build.directory}/${project.artifactId}-${project.version}.jar:/exemple-cdc-agent.jar</volume>
 														<volume>${project.build.testOutputDirectory}/conf/cdc:/tmp/conf</volume>
 														<volume>${project.build.testOutputDirectory}/conf/cassandra/cassandra.yaml:/etc/cassandra/cassandra.yaml</volume>
 														<volume>${project.build.testOutputDirectory}/conf/cassandra/logback.xml:/etc/cassandra/logback.xml</volume>
@@ -419,7 +416,7 @@
 												</env>
 												<volumes>
 													<bind>
-														<volume>${project.build.directory}/${project.artifactId}-${project.version}-exec.jar:/exemple-cdc-agent.jar</volume>
+														<volume>${project.build.directory}/${project.artifactId}-${project.version}.jar:/exemple-cdc-agent.jar</volume>
 														<volume>${project.build.testOutputDirectory}/conf/cdc:/tmp/conf</volume>
 														<volume>${project.build.testOutputDirectory}/conf/cassandra/cassandra.yaml:/etc/cassandra/cassandra.yaml</volume>
 														<volume>${project.build.testOutputDirectory}/conf/cassandra/logback.xml:/etc/cassandra/logback.xml</volume>
