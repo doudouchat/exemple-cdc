@@ -10,6 +10,8 @@ cassandra:
     version: ${cassandra.version}
     lib: file:${project.build.directory}/lib
     conf: file:${project.build.testOutputDirectory}/conf/cdc
+    loadAgent: true
+    reloadAgent: classpath:reload-agent-exec.jar
 kafka:
    version: ${io.confluent.kafka.version}
 zookeeper:

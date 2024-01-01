@@ -31,6 +31,7 @@ public class EmbeddedCassandraConfiguration {
     public CassandraContainer<?> embeddedCassandra(KafkaContainer kafkaContainer) throws IOException {
 
         var agent = ResourceUtils.getFile(cassandraProperties.getAgent()).getAbsolutePath();
+        var reloadAgent = ResourceUtils.getFile(cassandraProperties.getReloadAgent()).getAbsolutePath();
         var lib = ResourceUtils.getFile(cassandraProperties.getLib()).getAbsolutePath();
         var conf = ResourceUtils.getFile(cassandraProperties.getConf()).getAbsolutePath();
 
@@ -39,14 +40,19 @@ public class EmbeddedCassandraConfiguration {
                 .append("=")
                 .append("includes=com.exemple.cdc.*")
                 .append(",output=tcpserver,address=*")
-                .append(",classdumpdir=/tmp/agent/source")
-                .append(" ")
-                .append("-javaagent:/exemple-cdc-agent.jar");
+                .append(",classdumpdir=/tmp/agent/source");
+
+        if (cassandraProperties.isLoadAgent()) {
+            jvmExtraOpts
+                    .append(" ")
+                    .append("-javaagent:/exemple-cdc-agent.jar");
+        }
 
         return new CassandraContainer<>("cassandra:" + cassandraProperties.getVersion())
                 .withNetwork(kafkaContainer.getNetwork())
                 .withExposedPorts(9042, 6300)
                 .withCopyToContainer(MountableFile.forHostPath(agent), "/exemple-cdc-agent.jar")
+                .withCopyToContainer(MountableFile.forHostPath(reloadAgent), "/exemple-cdc-reload-agent.jar")
                 .withCopyToContainer(MountableFile.forHostPath(lib), "/tmp/lib")
                 .withCopyToContainer(MountableFile.forHostPath(conf), "/tmp/conf")
                 .withConfigurationOverride("conf/cassandra")
