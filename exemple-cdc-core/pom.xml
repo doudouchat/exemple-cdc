@@ -122,6 +122,14 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- BYTE BUDDY -->
+
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy-agent</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- JACOCO -->
 
 		<dependency>
@@ -156,6 +164,7 @@
 						<configuration>
 							<archive>
 								<manifestEntries>
+									<Agent-Class>com.exemple.cdc.core.Agent</Agent-Class>
 									<Premain-Class>com.exemple.cdc.core.Agent</Premain-Class>
 								</manifestEntries>
 							</archive>
@@ -175,6 +184,7 @@
 						<configuration>
 							<archive>
 								<manifestEntries>
+									<Agent-Class>com.exemple.cdc.core.AgentMock</Agent-Class>
 									<Premain-Class>com.exemple.cdc.core.AgentMock</Premain-Class>
 								</manifestEntries>
 							</archive>
@@ -182,6 +192,25 @@
 							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
 							<descriptors>
 								<descriptor>src/test/resources/assembly/agent-mock-assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+					<execution>
+						<phase>package</phase>
+						<id>reload</id>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<archive>
+								<manifestEntries>
+									<Main-Class>com.exemple.cdc.core.ReloadAgent</Main-Class>
+								</manifestEntries>
+							</archive>
+							<finalName>reload-agent</finalName>
+							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+							<descriptors>
+								<descriptor>src/test/resources/assembly/reload-agent-assembly.xml</descriptor>
 							</descriptors>
 						</configuration>
 					</execution>

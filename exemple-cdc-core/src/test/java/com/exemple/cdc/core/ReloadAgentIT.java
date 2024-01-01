@@ -10,17 +10,14 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.UUID;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.jacoco.core.data.ExecutionDataWriter;
 import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,27 +31,46 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.output.OutputFrame.OutputType;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.exemple.cdc.core.commitlog.CommitLogProcess;
 import com.exemple.cdc.core.core.AgentTestConfiguration;
 import com.exemple.cdc.core.core.cassandra.EmbeddedCassandraConfiguration;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest(classes = { EmbeddedCassandraConfiguration.class, AgentTestConfiguration.class })
 @ActiveProfiles("test")
-@TestPropertySource(properties = "cassandra.agent=classpath:agent-mock-exec.jar")
+@TestPropertySource(properties = { "cassandra.agent=classpath:agent-exec.jar", "cassandra.loadAgent=false" })
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AgentMockIT {
+@Slf4j
+class ReloadAgentIT {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Autowired
     private CqlSession session;
+
+    @Autowired
+    private KafkaConsumer<String, JsonNode> consumerEvent;
 
     @Autowired
     private GenericContainer<?> embeddedCassandra;
 
     @Autowired
     private KafkaContainer embeddedKafka;
-
+    
     @Autowired
     private GenericContainer<?> embeddedZookeeper;
+
+    @BeforeAll
+    public void startAgent() throws IOException, UnsupportedOperationException, InterruptedException {
+
+        embeddedCassandra.execInContainer("java", "-jar", "exemple-cdc-reload-agent.jar");
+
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).contains("CDC agent started");
+        });
+    }
 
     @BeforeAll
     public void createSchema() throws IOException {
@@ -63,67 +79,44 @@ class AgentMockIT {
         Arrays.stream(schema.getContentAsString(StandardCharsets.UTF_8).trim().split(";")).forEach(session::execute);
     }
 
-    @Nested
-    class CreateMultiEvents {
+    @Test
+    void createEventAfterLoadAgent() {
 
-        @Test
-        void createMultiEvents() throws InterruptedException, IOException {
+        // When perform
+        session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
+                + "55d7566c-077f-4a2f-9b80-b91c7aad2853,\n"
+                + "'2023-12-01 13:00',\n"
+                + "'app1',\n"
+                + "'v1',\n"
+                + "'CREATE_ACCOUNT',\n"
+                + "'{\n"
+                + "  \"email\": \"other@gmail.com\",\n"
+                + "  \"name\": \"Doe\"\n"
+                + "}',\n"
+                + "'2023-12-01'\n"
+                + ");");
 
-            // Setup segmentId
-            var ls = embeddedCassandra.execInContainer("ls", "/opt/cassandra/data/cdc_raw").getStdout();
-            var logsMatcher = CommitLogProcess.FILENAME_REGEX_PATTERN.matcher(ls);
+        // Then check event
+        await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
+            ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
+            assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
-            assert logsMatcher.lookingAt() : ls + " doesn't match ";
+                LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-            var segmentId = logsMatcher.group(1);
-
-            // when perform multiple update
-            var executorService = new ThreadPoolExecutor(5, 1000, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-
-            for (int i = 0; i < 6000; i++) {
-                executorService.submit(() -> insertEvent(UUID.randomUUID()));
-            }
-
-            // Then check logs
-            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
-                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).contains("Finished reading /opt/cassandra/data/cdc_raw/CommitLog");
-
+                assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
+                        + "  \"email\" : \"other@gmail.com\",\n"
+                        + "  \"name\" : \"Doe\",\n"
+                        + "  \"id\" : \"55d7566c-077f-4a2f-9b80-b91c7aad2853\"\n"
+                        + "}"));
             });
-
-            // And check missing commit log
-            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
-                var result = embeddedCassandra.execInContainer("ls", "/opt/cassandra/data/cdc_raw");
-                assertThat(result.getStdout()).doesNotContainPattern("CommitLog-\\d+-" + segmentId + ".log");
-                assertThat(result.getStdout()).doesNotContain("CommitLog-\\d+-" + segmentId + "_cdc.idx");
-
-            });
-
-            executorService.awaitTermination(5, TimeUnit.SECONDS);
-            executorService.shutdown();
-        }
-
-        private void insertEvent(UUID id) {
-
-            session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                    + id + ",\n"
-                    + "'2023-12-01 13:00',\n"
-                    + "'app1',\n"
-                    + "'v1',\n"
-                    + "'CREATE_ACCOUNT',\n"
-                    + "'{\n"
-                    + "  \"email\": \"other@gmail.com\",\n"
-                    + "  \"name\": \"Doe\"\n"
-                    + "}',\n"
-                    + "'2023-12-01'\n"
-                    + ");");
-        }
+        });
 
     }
 
     @AfterAll
     public void copyJacocoExec() throws IOException {
 
-        try (var localJacocoFile = new FileOutputStream("target/jacoco-mock-it.exec")) {
+        try (var localJacocoFile = new FileOutputStream("target/jacoco-it.exec")) {
 
             try (var socket = new Socket(InetAddress.getByName(embeddedCassandra.getHost()), embeddedCassandra.getMappedPort(6300))) {
 
@@ -144,6 +137,7 @@ class AgentMockIT {
 
     @AfterAll
     public void closeContainer() {
+        consumerEvent.close();
         embeddedKafka.stop();
         embeddedZookeeper.stop();
     }

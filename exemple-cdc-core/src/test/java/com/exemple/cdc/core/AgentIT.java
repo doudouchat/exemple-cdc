@@ -31,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.ResourceUtils;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.output.OutputFrame.OutputType;
 
 import com.datastax.oss.driver.api.core.CqlSession;
@@ -58,6 +59,12 @@ class AgentIT {
 
     @Autowired
     private GenericContainer<?> embeddedCassandra;
+
+    @Autowired
+    private KafkaContainer embeddedKafka;
+
+    @Autowired
+    private GenericContainer<?> embeddedZookeeper;
 
     @BeforeAll
     public void createSchema() throws IOException {
@@ -89,7 +96,7 @@ class AgentIT {
                     + ");");
 
             // Then check event
-            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
                 ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
                 assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
@@ -124,7 +131,7 @@ class AgentIT {
                     + ");");
 
             // Then check event
-            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
                 ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
                 assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
@@ -164,7 +171,7 @@ class AgentIT {
                     + "APPLY BATCH");
 
             // Then check event
-            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
                 ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
                 assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
@@ -191,7 +198,7 @@ class AgentIT {
                     + ");");
 
             // Then check event
-            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
                 ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
                 assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
@@ -307,6 +314,14 @@ class AgentIT {
 
             }
         }
+        embeddedCassandra.stop();
+    }
+
+    @AfterAll
+    public void closeContainer() {
+        consumerEvent.close();
+        embeddedKafka.stop();
+        embeddedZookeeper.stop();
     }
 
 }

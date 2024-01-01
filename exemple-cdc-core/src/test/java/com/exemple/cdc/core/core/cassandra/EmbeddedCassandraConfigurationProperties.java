@@ -13,6 +13,10 @@ public class EmbeddedCassandraConfigurationProperties {
     private final String version;
 
     private final String agent;
+    
+    private final String reloadAgent;
+    
+    private final boolean loadAgent;
 
     private final String lib;
 
