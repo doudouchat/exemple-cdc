@@ -14,9 +14,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-
-import com.exemple.cdc.core.common.DirectoryWatcher;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -28,7 +25,7 @@ public class DirectoryWatcherTest {
     @Nested
     @TestMethodOrder(OrderAnnotation.class)
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    class createOrChangeFile {
+    class createOrChangeOrDeleteFile {
 
         private Path directory;
 
@@ -42,7 +39,7 @@ public class DirectoryWatcherTest {
             directory = Files.createTempDirectory("test");
             records = new LinkedBlockingQueue<>();
 
-            DirectoryWatcher.onChangeOrCreateFile(directory, 5, f -> records.add(f.toPath()));
+            DirectoryWatcher.onCreateFile(directory, 5, f -> records.add(f.toPath()));
         }
 
         @Test
@@ -53,7 +50,7 @@ public class DirectoryWatcherTest {
             testFile = File.createTempFile("test", "", directory.toFile());
 
             // Then check event
-            var actualPath = records.poll(10, TimeUnit.SECONDS);
+            var actualPath = records.poll(2, TimeUnit.SECONDS);
             assertThat(actualPath).isEqualTo(testFile.toPath());
 
         }
@@ -66,8 +63,21 @@ public class DirectoryWatcherTest {
             FileUtils.write(testFile, "test", Charset.defaultCharset());
 
             // Then check event
-            var actualPath = records.poll(10, TimeUnit.SECONDS);
-            assertThat(actualPath).isEqualTo(testFile.toPath());
+            var actualPath = records.poll(2, TimeUnit.SECONDS);
+            assertThat(actualPath).isNull();
+
+        }
+
+        @Test
+        @Order(3)
+        void deleteFile() throws IOException, InterruptedException {
+
+            // When delete file
+            FileUtils.delete(testFile);
+
+            // Then check event
+            var actualPath = records.poll(2, TimeUnit.SECONDS);
+            assertThat(actualPath).isNull();
 
         }
 

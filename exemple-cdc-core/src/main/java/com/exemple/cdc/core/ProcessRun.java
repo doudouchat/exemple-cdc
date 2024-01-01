@@ -39,7 +39,7 @@ public class ProcessRun {
 
             waitStorageServiceIsStarting();
 
-            DirectoryWatcher.onChangeOrCreateFile(cdcLogPath, 0, file -> file.getAbsolutePath().endsWith("_cdc.idx"),
+            DirectoryWatcher.onCreateFile(cdcLogPath, 0, file -> file.getAbsolutePath().endsWith("_cdc.idx"),
                     file -> new CommitLogProcess(file, commitLogReader, commitLogReadHandler).process());
         });
 
