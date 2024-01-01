@@ -17,24 +17,19 @@ import lombok.SneakyThrows;
 public final class DirectoryWatcher {
 
     @SneakyThrows
-    public static void onChangeOrCreateFile(Path directory, long intervalMillis, Consumer<File> onChangeOrCreate) {
+    public static void onCreateFile(Path directory, long intervalMillis, Consumer<File> onChangeOrCreate) {
 
-        onChangeOrCreateFile(directory, intervalMillis, f -> true, onChangeOrCreate);
+        onCreateFile(directory, intervalMillis, f -> true, onChangeOrCreate);
     }
 
     @SneakyThrows
-    public static void onChangeOrCreateFile(Path directory, long intervalMillis, FileFilter filter, Consumer<File> onChangeOrCreate) {
+    public static void onCreateFile(Path directory, long intervalMillis, FileFilter filter, Consumer<File> onChangeOrCreate) {
 
         var observer = new FileAlterationObserver(directory.toString(), filter);
         var monitor = new FileAlterationMonitor(intervalMillis);
         var listener = new FileAlterationListenerAdaptor() {
             @Override
             public void onFileCreate(File file) {
-                onChangeOrCreate.accept(file);
-            }
-
-            @Override
-            public void onFileChange(File file) {
                 onChangeOrCreate.accept(file);
             }
         };
