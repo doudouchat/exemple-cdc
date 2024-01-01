@@ -31,7 +31,6 @@ import com.exemple.cdc.core.common.CdcEvent;
 import com.exemple.cdc.core.configuration.kafka.KafkaProducerModule;
 import com.exemple.cdc.core.configuration.zookeeper.ZookeeperClientModule;
 import com.exemple.cdc.core.core.AgentTestConfiguration;
-import com.exemple.cdc.core.event.EventProducer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
