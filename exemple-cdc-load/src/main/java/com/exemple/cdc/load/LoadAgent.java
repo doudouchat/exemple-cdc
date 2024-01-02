@@ -1,4 +1,4 @@
-package com.exemple.cdc.core;
+package com.exemple.cdc.load;
 
 import java.io.File;
 
@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
 @Slf4j
-public class ReloadAgent {
+public class LoadAgent {
 
     public static void main(String[] args) {
 
@@ -15,7 +15,7 @@ public class ReloadAgent {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("no cassandra process is started"));
 
-        ByteBuddyAgent.attach(new File("/exemple-cdc-agent.jar"), cassandraProcess.pid() + "");
+        ByteBuddyAgent.attach(new File(args[0]), cassandraProcess.pid() + "");
 
         LOG.info("Load CDC agent");
 

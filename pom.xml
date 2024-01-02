@@ -6,9 +6,10 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>exemple-cdc-load</module>
 		<module>exemple-cdc-core</module>
-		<module>jacoco-report</module>
 		<module>exemple-cdc-agent</module>
+		<module>jacoco-report</module>
 	</modules>
 
 	<properties>

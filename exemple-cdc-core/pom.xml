@@ -122,14 +122,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- BYTE BUDDY -->
-
-		<dependency>
-			<groupId>net.bytebuddy</groupId>
-			<artifactId>byte-buddy-agent</artifactId>
-			<scope>test</scope>
-		</dependency>
-
 		<!-- JACOCO -->
 
 		<dependency>
@@ -195,25 +187,6 @@
 							</descriptors>
 						</configuration>
 					</execution>
-					<execution>
-						<phase>package</phase>
-						<id>reload</id>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<archive>
-								<manifestEntries>
-									<Main-Class>com.exemple.cdc.core.ReloadAgent</Main-Class>
-								</manifestEntries>
-							</archive>
-							<finalName>reload-agent</finalName>
-							<outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
-							<descriptors>
-								<descriptor>src/test/resources/assembly/reload-agent-assembly.xml</descriptor>
-							</descriptors>
-						</configuration>
-					</execution>
 				</executions>
 
 			</plugin>
@@ -232,7 +205,7 @@
 				</executions>
 			</plugin>
 
-			<!-- COPY JACOCO JAR AGENT -->
+			<!-- COPY JACOCO JAR AGENT && LOAD AGENT-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -256,6 +229,15 @@
 							<overWrite>false</overWrite>
 							<outputDirectory>${project.build.directory}/lib</outputDirectory>
 							<destFileName>jacocoagent.jar</destFileName>
+						</artifactItem>
+						<artifactItem>
+							<groupId>exemple</groupId>
+							<artifactId>exemple-cdc-load</artifactId>
+							<version>${project.version}</version>
+							<type>jar</type>
+							<overWrite>false</overWrite>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<destFileName>exemple-cdc-load-agent.jar</destFileName>
 						</artifactItem>
 					</artifactItems>
 				</configuration>
