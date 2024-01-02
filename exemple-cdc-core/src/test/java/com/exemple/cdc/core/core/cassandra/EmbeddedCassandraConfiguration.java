@@ -31,7 +31,6 @@ public class EmbeddedCassandraConfiguration {
     public CassandraContainer<?> embeddedCassandra(KafkaContainer kafkaContainer) throws IOException {
 
         var agent = ResourceUtils.getFile(cassandraProperties.getAgent()).getAbsolutePath();
-        var reloadAgent = ResourceUtils.getFile(cassandraProperties.getReloadAgent()).getAbsolutePath();
         var lib = ResourceUtils.getFile(cassandraProperties.getLib()).getAbsolutePath();
         var conf = ResourceUtils.getFile(cassandraProperties.getConf()).getAbsolutePath();
 
@@ -50,9 +49,8 @@ public class EmbeddedCassandraConfiguration {
 
         return new CassandraContainer<>("cassandra:" + cassandraProperties.getVersion())
                 .withNetwork(kafkaContainer.getNetwork())
-                .withExposedPorts(9042, 6300)
+                .withExposedPorts(9042, 6300, 6301)
                 .withCopyToContainer(MountableFile.forHostPath(agent), "/exemple-cdc-agent.jar")
-                .withCopyToContainer(MountableFile.forHostPath(reloadAgent), "/exemple-cdc-reload-agent.jar")
                 .withCopyToContainer(MountableFile.forHostPath(lib), "/tmp/lib")
                 .withCopyToContainer(MountableFile.forHostPath(conf), "/tmp/conf")
                 .withConfigurationOverride("conf/cassandra")

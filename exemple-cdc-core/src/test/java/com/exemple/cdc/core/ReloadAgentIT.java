@@ -58,14 +58,23 @@ class ReloadAgentIT {
 
     @Autowired
     private KafkaContainer embeddedKafka;
-    
+
     @Autowired
     private GenericContainer<?> embeddedZookeeper;
 
     @BeforeAll
     public void startAgent() throws IOException, UnsupportedOperationException, InterruptedException {
 
-        embeddedCassandra.execInContainer("java", "-jar", "exemple-cdc-reload-agent.jar");
+        var jvmOpts = new StringBuffer()
+                .append("-javaagent:/tmp/lib/jacocoagent.jar")
+                .append("=")
+                .append("includes=com.exemple.cdc.*")
+                .append(",destfile=/tmp/load/jacoco.exec");
+
+        var stdOut = embeddedCassandra
+                .execInContainer("java", jvmOpts.toString(), "-jar", "tmp/lib/exemple-cdc-load-agent.jar", "/exemple-cdc-agent.jar").getStdout();
+
+        assertThat(stdOut).contains("Load CDC agent");
 
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
             assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).contains("CDC agent started");
@@ -97,7 +106,7 @@ class ReloadAgentIT {
                 + ");");
 
         // Then check event
-        await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
+        await().atMost(Duration.ofSeconds(90)).untilAsserted(() -> {
             ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
             assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
@@ -116,7 +125,7 @@ class ReloadAgentIT {
     @AfterAll
     public void copyJacocoExec() throws IOException {
 
-        try (var localJacocoFile = new FileOutputStream("target/jacoco-it.exec")) {
+        try (var localJacocoFile = new FileOutputStream("target/jacoco-reload-it.exec")) {
 
             try (var socket = new Socket(InetAddress.getByName(embeddedCassandra.getHost()), embeddedCassandra.getMappedPort(6300))) {
 
@@ -132,6 +141,8 @@ class ReloadAgentIT {
 
             }
         }
+
+        embeddedCassandra.copyFileFromContainer("/tmp/load/jacoco.exec", "target/jacoco-load-it.exec");
         embeddedCassandra.stop();
     }
 
