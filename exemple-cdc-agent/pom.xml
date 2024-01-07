@@ -117,6 +117,15 @@
 			<artifactId>junit-platform-suite-engine</artifactId>
 		</dependency>
 
+		<!-- CONTAINER -->
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
@@ -150,6 +159,7 @@
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<manifestEntries>
+										<Agent-Class>com.exemple.cdc.agent.Agent</Agent-Class>
 										<Premain-Class>com.exemple.cdc.agent.Agent</Premain-Class>
 									</manifestEntries>
 								</transformer>
@@ -215,7 +225,7 @@
 								<configuration>
 									<address>127.0.0.1</address>
 									<port>6300</port>
-									<destFile>${project.build.directory}/jacoco-it-cassandra-1.exec</destFile>
+									<destFile>${project.build.directory}/jacoco-cassandra-1-it.exec</destFile>
 								</configuration>
 							</execution>
 							<execution>
@@ -226,25 +236,38 @@
 								<configuration>
 									<address>127.0.0.1</address>
 									<port>6301</port>
-									<destFile>${project.build.directory}/jacoco-it-cassandra-2.exec</destFile>
+									<destFile>${project.build.directory}/jacoco-cassandra-2-it.exec</destFile>
 								</configuration>
 							</execution>
 							<execution>
-								<id>report-sonar</id>
+								<id>merge</id>
 								<phase>verify</phase>
 								<goals>
-									<goal>report-aggregate</goal>
+									<goal>merge</goal>
 								</goals>
 								<configuration>
-									<includeCurrentProject>true</includeCurrentProject>
-									<outputDirectory>${project.reporting.outputDirectory}/jacoco-it</outputDirectory>
+									<destFile>${project.build.directory}/jacoco-it.exec</destFile>
+									<fileSets>
+										<fileSet>
+											<directory>${project.build.directory}</directory>
+											<includes>
+												<include>*-it.exec</include>
+												<include>jacoco-load-it/*</include>
+											</includes>
+										</fileSet>
+									</fileSets>
 								</configuration>
+							</execution>
+							<execution>
+								<id>report-integration</id>
+								<goals>
+									<goal>report-integration</goal>
+								</goals>
 							</execution>
 						</executions>
 					</plugin>
 
-					<!-- COPY JACOCO JAR AGENT -->
-
+					<!-- COPY JACOCO JAR AGENT && LOAD AGENT-->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-dependency-plugin</artifactId>
@@ -268,6 +291,15 @@
 									<overWrite>false</overWrite>
 									<outputDirectory>${project.build.directory}/lib</outputDirectory>
 									<destFileName>jacocoagent.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>exemple</groupId>
+									<artifactId>exemple-cdc-load</artifactId>
+									<version>${project.version}</version>
+									<type>jar</type>
+									<overWrite>false</overWrite>
+									<outputDirectory>${project.build.directory}/lib</outputDirectory>
+									<destFileName>exemple-cdc-load-agent.jar</destFileName>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
@@ -386,6 +418,14 @@
 													<entry>
 														<containerPath>/tmp/agent/source/com</containerPath>
 														<hostDirectory>${project.build.outputDirectory}</hostDirectory>
+													</entry>
+													<entry>
+														<containerPath>/tmp/load/source/com</containerPath>
+														<hostDirectory>${project.build.outputDirectory}</hostDirectory>
+													</entry>
+													<entry>
+														<containerPath>/tmp/load/jacoco.exec</containerPath>
+														<hostDirectory>${project.build.directory}/jacoco-load-it</hostDirectory>
 													</entry>
 												</entries>
 											</copy>
