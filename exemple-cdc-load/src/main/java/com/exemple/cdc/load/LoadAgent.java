@@ -2,10 +2,13 @@ package com.exemple.cdc.load;
 
 import java.io.File;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LoadAgent {
 
     public static void main(String[] args) {
