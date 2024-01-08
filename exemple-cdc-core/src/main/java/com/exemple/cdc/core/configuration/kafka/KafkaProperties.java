@@ -13,6 +13,10 @@ public class KafkaProperties {
 
     private final int timeout;
 
+    private final int socketConnectionTimeout;
+
+    private final int socketConnectionTimeoutMax;
+
     private final Map<String, String> topics;
 
 }
