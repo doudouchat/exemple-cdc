@@ -7,6 +7,7 @@ import java.util.Properties;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -46,6 +47,8 @@ public class KafkaProducerModule {
 
         var props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBoostrapServers());
+        props.put(ProducerConfig.SOCKET_CONNECTION_SETUP_TIMEOUT_MS_CONFIG, properties.getSocketConnectionTimeout());
+        props.put(ProducerConfig.SOCKET_CONNECTION_SETUP_TIMEOUT_MAX_MS_CONFIG, properties.getSocketConnectionTimeoutMax());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaJsonSerializer.class);
 
@@ -60,6 +63,10 @@ public class KafkaProducerModule {
                 .boostrapServers((String) kafkaProperties.get("bootstrap_servers"))
                 .timeout((int) kafkaProperties.get("timeout"))
                 .topics((Map<String, String>) kafkaProperties.get("topics"))
+                .socketConnectionTimeout((int) kafkaProperties.computeIfAbsent("socket_connection_timeout",
+                        key -> CommonClientConfigs.DEFAULT_SOCKET_CONNECTION_SETUP_TIMEOUT_MS.intValue()))
+                .socketConnectionTimeoutMax((int) kafkaProperties.computeIfAbsent("socket_connection_timeout_max",
+                        key -> CommonClientConfigs.DEFAULT_SOCKET_CONNECTION_SETUP_TIMEOUT_MAX_MS.intValue()))
                 .build();
     }
 
