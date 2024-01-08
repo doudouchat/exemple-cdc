@@ -29,27 +29,23 @@ public class Agent {
 
     static void main(String agentArgs, Instrumentation inst) {
         DatabaseDescriptor.daemonInitialization();
-        if (!DatabaseDescriptor.isCDCEnabled()) {
-            LOG.error("cdc_enabled=false in your cassandra configuration, CDC agent not started.");
-        } else if (DatabaseDescriptor.getCDCLogLocation() == null) {
-            LOG.error("cdc_raw_directory=null in your cassandra configuration, CDC agent not started.");
-        } else {
 
-            LOG.info("Starting CDC agent");
+        assert DatabaseDescriptor.isCDCEnabled() : "cdc_enabled=false in your cassandra configuration, CDC agent not started.";
+        assert DatabaseDescriptor.getCDCLogLocation() != null : "cdc_raw_directory=null in your cassandra configuration, CDC agent not started.";
 
-            var cdcLogPath = Paths.get(DatabaseDescriptor.getCDCLogLocation());
-            LOG.info(cdcLogPath.toString());
+        LOG.info("Starting CDC agent");
 
-            var eventProducer = DaggerEventProducerComponent.builder().eventProducerModule(new EventProducerModule("/tmp/conf/exemple-cdc.yml"))
-                    .build()
-                    .eventProducer();
+        var cdcLogPath = Paths.get(DatabaseDescriptor.getCDCLogLocation());
+        LOG.info(cdcLogPath.toString());
 
-            var agentProcess = new ProcessRun(cdcLogPath, eventProducer);
-            agentProcess.start();
+        var eventProducer = DaggerEventProducerComponent.builder().eventProducerModule(new EventProducerModule("/tmp/conf/exemple-cdc.yml"))
+                .build()
+                .eventProducer();
 
-            LOG.info("CDC agent started");
+        var agentProcess = new ProcessRun(cdcLogPath, eventProducer);
+        agentProcess.start();
 
-        }
+        LOG.info("CDC agent started");
     }
 
 }
