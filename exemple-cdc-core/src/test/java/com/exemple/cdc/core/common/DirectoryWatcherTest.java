@@ -39,7 +39,9 @@ public class DirectoryWatcherTest {
             directory = Files.createTempDirectory("test");
             records = new LinkedBlockingQueue<>();
 
-            DirectoryWatcher.onCreateFile(directory, 5, f -> records.add(f.toPath()));
+            var watcher = new DirectoryWatcher(directory, 5, f -> true, f -> records.add(f.toPath()));
+
+            watcher.onCreateFile();
         }
 
         @Test
@@ -78,6 +80,57 @@ public class DirectoryWatcherTest {
             // Then check event
             var actualPath = records.poll(2, TimeUnit.SECONDS);
             assertThat(actualPath).isNull();
+
+        }
+        
+        @Test
+        @Order(4)
+        void createAgainFile() throws IOException, InterruptedException {
+
+            // When delete file
+            Files.createFile(testFile.toPath());
+
+            // Then check event
+            var actualPath = records.poll(2, TimeUnit.SECONDS);
+            assertThat(actualPath).isEqualTo(testFile.toPath());
+
+        }
+
+    }
+
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    class createBeforeStartListener {
+
+        private Path directory;
+
+        private File testFile;
+
+        private DirectoryWatcher watcher;
+
+        protected BlockingQueue<Path> records;
+
+        @BeforeAll
+        void initWatch() throws IOException {
+
+            directory = Files.createTempDirectory("test");
+            records = new LinkedBlockingQueue<>();
+            watcher = new DirectoryWatcher(directory, 5, f -> true, f -> records.add(f.toPath()));
+
+        }
+
+        @Test
+        void createFile() throws IOException, InterruptedException {
+
+            // Given create file
+            testFile = File.createTempFile("test", "", directory.toFile());
+
+            // When start
+            watcher.onCreateFile();
+
+            // Then check event
+            var actualPath = records.poll(2, TimeUnit.SECONDS);
+            assertThat(actualPath).isEqualTo(testFile.toPath());
 
         }
 

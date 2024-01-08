@@ -18,8 +18,11 @@ import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.FileSystemResource;
@@ -42,6 +45,8 @@ import lombok.extern.slf4j.Slf4j;
 @ActiveProfiles("test")
 @TestPropertySource(properties = { "cassandra.agent=classpath:agent-exec.jar", "cassandra.loadAgent=false" })
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(OrderAnnotation.class)
+
 @Slf4j
 class ReloadAgentIT {
 
@@ -63,8 +68,31 @@ class ReloadAgentIT {
     private GenericContainer<?> embeddedZookeeper;
 
     @BeforeAll
-    public void startAgent() throws IOException, UnsupportedOperationException, InterruptedException {
+    public void createSchema() throws IOException {
 
+        var schema = new FileSystemResource(ResourceUtils.getFile("classpath:script/schema.cql"));
+        Arrays.stream(schema.getContentAsString(StandardCharsets.UTF_8).trim().split(";")).forEach(session::execute);
+    }
+
+    @Test
+    @Order(1)
+    void createEventBeforeLoadAgent() throws UnsupportedOperationException, IOException, InterruptedException {
+
+        // Given perform
+        session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
+                + "48972a46-b48b-499f-aa63-534754497090,\n"
+                + "'2023-12-01 13:00',\n"
+                + "'app1',\n"
+                + "'v1',\n"
+                + "'CREATE_ACCOUNT',\n"
+                + "'{\n"
+                + "  \"email\": \"other@gmail.com\",\n"
+                + "  \"name\": \"Doe\"\n"
+                + "}',\n"
+                + "'2023-12-01'\n"
+                + ");");
+
+        // When perform agent
         var jvmOpts = new StringBuffer()
                 .append("-javaagent:/tmp/lib/jacocoagent.jar")
                 .append("=")
@@ -74,21 +102,33 @@ class ReloadAgentIT {
         var stdOut = embeddedCassandra
                 .execInContainer("java", jvmOpts.toString(), "-jar", "tmp/lib/exemple-cdc-load-agent.jar", "/exemple-cdc-agent.jar").getStdout();
 
+        // Then check load agent logs
         assertThat(stdOut).contains("Load CDC agent");
 
+        // And check agent logs
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
             assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).contains("CDC agent started");
         });
-    }
 
-    @BeforeAll
-    public void createSchema() throws IOException {
+        // And check event
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+            ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
+            assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 
-        var schema = new FileSystemResource(ResourceUtils.getFile("classpath:script/schema.cql"));
-        Arrays.stream(schema.getContentAsString(StandardCharsets.UTF_8).trim().split(";")).forEach(session::execute);
+                LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
+
+                assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
+                        + "  \"email\" : \"other@gmail.com\",\n"
+                        + "  \"name\" : \"Doe\",\n"
+                        + "  \"id\" : \"48972a46-b48b-499f-aa63-534754497090\"\n"
+                        + "}"));
+            });
+        });
+
     }
 
     @Test
+    @Order(2)
     void createEventAfterLoadAgent() {
 
         // When perform
@@ -106,7 +146,7 @@ class ReloadAgentIT {
                 + ");");
 
         // Then check event
-        await().atMost(Duration.ofSeconds(90)).untilAsserted(() -> {
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
             assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 

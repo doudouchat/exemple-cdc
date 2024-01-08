@@ -38,9 +38,10 @@ public class ProcessRun {
         commitLogExecutor.submit(() -> {
 
             waitStorageServiceIsStarting();
-
-            DirectoryWatcher.onCreateFile(cdcLogPath, 0, file -> file.getAbsolutePath().endsWith("_cdc.idx"),
+            var watcher = new DirectoryWatcher(cdcLogPath, 0, file -> file.getAbsolutePath().endsWith("_cdc.idx"),
                     file -> new CommitLogProcess(file, commitLogReader, commitLogReadHandler).process());
+
+            watcher.onCreateFile();
         });
 
     }
