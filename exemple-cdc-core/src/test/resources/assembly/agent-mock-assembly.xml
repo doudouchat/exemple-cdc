@@ -12,6 +12,9 @@
 			<useProjectArtifact>true</useProjectArtifact>
 			<unpack>true</unpack>
 			<scope>test</scope>
+			<excludes>
+				<exclude>org.springframework.boot:*</exclude>
+			</excludes>
 		</dependencySet>
 	</dependencySets>
 	<fileSets>

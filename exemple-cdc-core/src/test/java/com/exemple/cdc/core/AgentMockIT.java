@@ -18,11 +18,17 @@ import java.util.concurrent.TimeUnit;
 import org.jacoco.core.data.ExecutionDataWriter;
 import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
+import org.joda.time.LocalDateTime;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.ClassOrderer;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.FileSystemResource;
@@ -32,6 +38,7 @@ import org.springframework.util.ResourceUtils;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.output.OutputFrame.OutputType;
+import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.exemple.cdc.core.commitlog.CommitLogProcess;
@@ -42,6 +49,7 @@ import com.exemple.cdc.core.core.cassandra.EmbeddedCassandraConfiguration;
 @ActiveProfiles("test")
 @TestPropertySource(properties = "cassandra.agent=classpath:agent-mock-exec.jar")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class AgentMockIT {
 
     @Autowired
@@ -64,6 +72,7 @@ class AgentMockIT {
     }
 
     @Nested
+    @Order(1)
     class CreateMultiEvents {
 
         @Test
@@ -81,7 +90,7 @@ class AgentMockIT {
             var executorService = new ThreadPoolExecutor(5, 1000, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
             for (int i = 0; i < 6000; i++) {
-                executorService.submit(() -> insertEvent(UUID.randomUUID()));
+                executorService.submit(() -> insertEvent(UUID.randomUUID(), "ANY_EVENT"));
             }
 
             // Then check logs
@@ -102,20 +111,62 @@ class AgentMockIT {
             executorService.shutdown();
         }
 
-        private void insertEvent(UUID id) {
+    }
 
-            session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                    + id + ",\n"
-                    + "'2023-12-01 13:00',\n"
-                    + "'app1',\n"
-                    + "'v1',\n"
-                    + "'CREATE_ACCOUNT',\n"
-                    + "'{\n"
-                    + "  \"email\": \"other@gmail.com\",\n"
-                    + "  \"name\": \"Doe\"\n"
-                    + "}',\n"
-                    + "'2023-12-01'\n"
-                    + ");");
+    @Nested
+    @Order(2)
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    @TestMethodOrder(OrderAnnotation.class)
+    class CreateExceptionEvents {
+
+        private LocalDateTime firstEvent;
+
+        @Test
+        @Order(0)
+        void createOneEvent() {
+
+            // when perform update
+            this.firstEvent = insertEvent(UUID.randomUUID(), "SUCCESS_EVENT");
+
+            // Then check logs
+            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("SUCCESS EVENT " + this.firstEvent);
+            });
+        }
+
+        @Test
+        @Order(1)
+        void createOneExceptionEvent() {
+
+            // when perform update
+            this.firstEvent = insertEvent(UUID.randomUUID(), "FAILURE_EVENT");
+
+            // Then check logs
+            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("FAILURE EVENT " + this.firstEvent);
+            });
+        }
+
+        @Test
+        @Order(2)
+        void reloadAgent() throws UnsupportedOperationException, IOException, InterruptedException {
+
+            // Given success event
+            insertEvent(UUID.randomUUID(), "SUCCESS_EVENT");
+
+            // When perform agent
+            var jvmOpts = new StringBuffer()
+                    .append("-javaagent:/tmp/lib/jacocoagent.jar")
+                    .append("=")
+                    .append("includes=com.exemple.cdc.*")
+                    .append(",destfile=/tmp/load/jacoco.exec");
+            embeddedCassandra
+                    .execInContainer("java", jvmOpts.toString(), "-jar", "tmp/lib/exemple-cdc-load-agent.jar", "/exemple-cdc-agent.jar");
+
+            // Then check logs
+            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "FAILURE EVENT " + this.firstEvent)).isEqualTo(2);
+            });
         }
 
     }
@@ -139,6 +190,7 @@ class AgentMockIT {
 
             }
         }
+        embeddedCassandra.copyFileFromContainer("/tmp/load/jacoco.exec", "target/jacoco-mock-reload-it.exec");
         embeddedCassandra.stop();
     }
 
@@ -146,6 +198,26 @@ class AgentMockIT {
     public void closeContainer() {
         embeddedKafka.stop();
         embeddedZookeeper.stop();
+    }
+
+    private LocalDateTime insertEvent(UUID id, String eventType) {
+
+        var eventDate = LocalDateTime.now();
+
+        session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
+                + id + ",\n"
+                + "'" + eventDate.toString() + "',\n"
+                + "'app1',\n"
+                + "'v1',\n"
+                + "'" + eventType + "',\n"
+                + "'{\n"
+                + "  \"email\": \"other@gmail.com\",\n"
+                + "  \"name\": \"Doe\"\n"
+                + "}',\n"
+                + "'2023-12-01'\n"
+                + ");");
+
+        return eventDate;
     }
 
 }
