@@ -46,7 +46,6 @@ import lombok.extern.slf4j.Slf4j;
 @TestPropertySource(properties = { "cassandra.agent=classpath:agent-exec.jar", "cassandra.loadAgent=false" })
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(OrderAnnotation.class)
-
 @Slf4j
 class ReloadAgentIT {
 
