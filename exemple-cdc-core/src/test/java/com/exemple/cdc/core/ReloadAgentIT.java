@@ -99,7 +99,11 @@ class ReloadAgentIT {
                 .append(",destfile=/tmp/load/jacoco.exec");
 
         var stdOut = embeddedCassandra
-                .execInContainer("java", jvmOpts.toString(), "-jar", "tmp/lib/exemple-cdc-load-agent.jar", "/exemple-cdc-agent.jar").getStdout();
+                .execInContainer("java", jvmOpts.toString(), "-jar",
+                        "tmp/lib/exemple-cdc-load-agent.jar",
+                        "/exemple-cdc-agent.jar",
+                        "conf=/tmp/conf/exemple-cdc.yml")
+                .getStdout();
 
         // Then check load agent logs
         assertThat(stdOut).contains("Load CDC agent");
