@@ -18,7 +18,7 @@ public class LoadAgent {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("no cassandra process is started"));
 
-        ByteBuddyAgent.attach(new File(args[0]), cassandraProcess.pid() + "");
+        ByteBuddyAgent.attach(new File(args[0]), cassandraProcess.pid() + "", args[1]);
 
         LOG.info("Load CDC agent");
 

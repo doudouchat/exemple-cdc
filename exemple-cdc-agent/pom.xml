@@ -385,7 +385,7 @@
 												</ports>
 												<env>
 													<JVM_OPTS>-Dcassandra.skip_wait_for_gossip_to_settle=0 -Dcassandra.initial_token=0</JVM_OPTS>
-													<JVM_EXTRA_OPTS>-javaagent:/tmp/lib/jacocoagent.jar=includes=com.exemple.cdc.*,output=tcpserver,address=*,classdumpdir=/tmp/agent/source -javaagent:/exemple-cdc-agent.jar</JVM_EXTRA_OPTS>
+													<JVM_EXTRA_OPTS>-javaagent:/tmp/lib/jacocoagent.jar=includes=com.exemple.cdc.*,output=tcpserver,address=*,classdumpdir=/tmp/agent/source -javaagent:/exemple-cdc-agent.jar=conf=/tmp/conf/exemple-cdc.yml</JVM_EXTRA_OPTS>
 													<CASSANDRA_CLUSTER_NAME>cassandra-cluster-it</CASSANDRA_CLUSTER_NAME>
 													<CASSANDRA_SEEDS>172.17.0.4</CASSANDRA_SEEDS>
 												</env>
@@ -447,7 +447,7 @@
 												</ports>
 												<env>
 													<JVM_OPTS>-Dcassandra.skip_wait_for_gossip_to_settle=0 -Dcassandra.initial_token=2</JVM_OPTS>
-													<JVM_EXTRA_OPTS>-javaagent:/tmp/lib/jacocoagent.jar=includes=com.exemple.cdc.*,output=tcpserver,address=*,classdumpdir=/tmp/agent/source -javaagent:/exemple-cdc-agent.jar</JVM_EXTRA_OPTS>
+													<JVM_EXTRA_OPTS>-javaagent:/tmp/lib/jacocoagent.jar=includes=com.exemple.cdc.*,output=tcpserver,address=*,classdumpdir=/tmp/agent/source -javaagent:/exemple-cdc-agent.jar=conf=/tmp/conf/exemple-cdc.yml</JVM_EXTRA_OPTS>
 													<CASSANDRA_CLUSTER_NAME>cassandra-cluster-it</CASSANDRA_CLUSTER_NAME>
 													<CASSANDRA_SEEDS>172.17.0.4</CASSANDRA_SEEDS>
 												</env>

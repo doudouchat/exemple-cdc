@@ -34,7 +34,9 @@ public class AgentStepDefinitions {
                 .withAttachStdout(true)
                 .withAttachStderr(true)
                 .withCmd("java", jvmOpts.toString(), "-jar",
-                        "tmp/lib/exemple-cdc-load-agent.jar", "/exemple-cdc-agent.jar")
+                        "tmp/lib/exemple-cdc-load-agent.jar",
+                        "/exemple-cdc-agent.jar",
+                        "conf=/tmp/conf/exemple-cdc.yml")
                 .exec();
 
         var stdoutConsumer = new ToStringConsumer();

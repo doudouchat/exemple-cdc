@@ -160,8 +160,10 @@ class AgentMockIT {
                     .append("=")
                     .append("includes=com.exemple.cdc.*")
                     .append(",destfile=/tmp/load/jacoco.exec");
-            embeddedCassandra
-                    .execInContainer("java", jvmOpts.toString(), "-jar", "tmp/lib/exemple-cdc-load-agent.jar", "/exemple-cdc-agent.jar");
+            embeddedCassandra.execInContainer("java", jvmOpts.toString(), "-jar",
+                    "tmp/lib/exemple-cdc-load-agent.jar",
+                    "/exemple-cdc-agent.jar",
+                    "conf=/tmp/conf/exemple-cdc.yml");
 
             // Then check logs
             await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
