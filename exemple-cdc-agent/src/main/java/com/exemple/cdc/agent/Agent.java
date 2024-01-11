@@ -2,8 +2,6 @@ package com.exemple.cdc.agent;
 
 import java.lang.instrument.Instrumentation;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import org.apache.cassandra.config.DatabaseDescriptor;
 
@@ -12,7 +10,6 @@ import com.exemple.cdc.core.configuration.event.DaggerEventProducerComponent;
 import com.exemple.cdc.core.configuration.event.EventProducerModule;
 
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,22 +49,6 @@ public class Agent {
         agentProcess.start();
 
         LOG.info("CDC agent started");
-    }
-
-    @Getter
-    private static class AgentArgs {
-
-        private final String cdcConfiguration;
-
-        public AgentArgs(String mainArgs) {
-
-            var agentArgs = Arrays.stream(mainArgs.split(","))
-                    .map(arg -> arg.split("="))
-                    .collect(Collectors.toMap(arg -> arg[0], arg -> arg[1]));
-
-            cdcConfiguration = agentArgs.get("conf");
-        }
-
     }
 
 }
