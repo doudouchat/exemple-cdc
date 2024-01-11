@@ -23,6 +23,8 @@ public class AgentMock {
 
     public static void premain(String agentArgs, Instrumentation inst) {
 
+        var forceSuccess = agentArgs != null ? agentArgs.contains("force_success=true") : false;
+
         LOG.info("Starting CDC agent mock");
         DatabaseDescriptor.daemonInitialization();
         var cdcLogPath = Paths.get(DatabaseDescriptor.getCDCLogLocation());
@@ -33,10 +35,15 @@ public class AgentMock {
             CdcEvent event = invocation.getArgument(0);
 
             if ("FAILURE_EVENT".equals(event.getEventType())) {
-                LOG.error("FAILURE EVENT " + event.getDate());
-                throw new Exception("unexpected exception");
+
+                if (forceSuccess) {
+                    LOG.debug("SUCCESS EVENT " + event.getDate());
+                } else {
+                    LOG.error("FAILURE EVENT " + event.getDate());
+                    throw new Exception("unexpected exception");
+                }
             }
-            
+
             if ("SUCCESS_EVENT".equals(event.getEventType())) {
                 LOG.debug("SUCCESS EVENT " + event.getDate());
             }

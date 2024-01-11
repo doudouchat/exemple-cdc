@@ -119,18 +119,20 @@ class AgentMockIT {
     @TestMethodOrder(OrderAnnotation.class)
     class CreateExceptionEvents {
 
-        private LocalDateTime firstEvent;
+        private LocalDateTime failureEvent;
+
+        private LocalDateTime successEvent;
 
         @Test
         @Order(0)
         void createOneEvent() {
 
             // when perform update
-            this.firstEvent = insertEvent(UUID.randomUUID(), "SUCCESS_EVENT");
+            var event = insertEvent(UUID.randomUUID(), "SUCCESS_EVENT");
 
             // Then check logs
             await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
-                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("SUCCESS EVENT " + this.firstEvent);
+                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("SUCCESS EVENT " + event);
             });
         }
 
@@ -139,20 +141,20 @@ class AgentMockIT {
         void createOneExceptionEvent() {
 
             // when perform update
-            this.firstEvent = insertEvent(UUID.randomUUID(), "FAILURE_EVENT");
+            this.failureEvent = insertEvent(UUID.randomUUID(), "FAILURE_EVENT");
 
             // Then check logs
             await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
-                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("FAILURE EVENT " + this.firstEvent);
+                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("FAILURE EVENT " + this.failureEvent);
             });
         }
 
         @Test
         @Order(2)
-        void reloadAgent() throws UnsupportedOperationException, IOException, InterruptedException {
+        void reloadAgentWithFailure() throws UnsupportedOperationException, IOException, InterruptedException {
 
             // Given success event
-            insertEvent(UUID.randomUUID(), "SUCCESS_EVENT");
+            this.successEvent = insertEvent(UUID.randomUUID(), "SUCCESS_EVENT");
 
             // When perform agent
             var jvmOpts = new StringBuffer()
@@ -163,11 +165,33 @@ class AgentMockIT {
             embeddedCassandra.execInContainer("java", jvmOpts.toString(), "-jar",
                     "tmp/lib/exemple-cdc-load-agent.jar",
                     "/exemple-cdc-agent.jar",
-                    "conf=/tmp/conf/exemple-cdc.yml");
+                    "nope");
 
             // Then check logs
             await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
-                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "FAILURE EVENT " + this.firstEvent)).isEqualTo(2);
+                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "FAILURE EVENT " + this.failureEvent)).isEqualTo(2);
+            });
+        }
+
+        @Test
+        @Order(3)
+        void reloadAgentWithSuccess() throws UnsupportedOperationException, IOException, InterruptedException {
+
+            // When perform agent
+            var jvmOpts = new StringBuffer()
+                    .append("-javaagent:/tmp/lib/jacocoagent.jar")
+                    .append("=")
+                    .append("includes=com.exemple.cdc.*")
+                    .append(",destfile=/tmp/load/jacoco.exec");
+            embeddedCassandra.execInContainer("java", jvmOpts.toString(), "-jar",
+                    "tmp/lib/exemple-cdc-load-agent.jar",
+                    "/exemple-cdc-agent.jar",
+                    "force_success=true");
+
+            // Then check logs
+            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "SUCCESS EVENT " + this.failureEvent)).isEqualTo(1);
+                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "SUCCESS EVENT " + this.successEvent)).isEqualTo(1);
             });
         }
 
