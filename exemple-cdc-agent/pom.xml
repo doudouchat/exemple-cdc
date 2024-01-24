@@ -318,7 +318,7 @@
 								<configuration>
 									<images>
 										<image>
-											<name>bitnami/kafka:3.6.0</name>
+											<name>bitnami/kafka:3.6.1</name>
 											<alias>kafka</alias>
 											<run>
 												<ports>
