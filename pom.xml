@@ -25,7 +25,7 @@
 		<io.confluent.kafka.version>7.6.0</io.confluent.kafka.version>
 		<jacoco.version>0.8.11</jacoco.version>
 		<lombok.version>1.18.30</lombok.version>
-		<dagger.version>2.50</dagger.version>
+		<dagger.version>2.51</dagger.version>
 
 		<!-- SONAR -->
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
