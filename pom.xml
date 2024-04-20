@@ -23,7 +23,7 @@
 		<!-- VERSION -->
 		<cassandra.version>4.1.4</cassandra.version>
 		<io.confluent.kafka.version>7.6.0</io.confluent.kafka.version>
-		<jacoco.version>0.8.11</jacoco.version>
+		<jacoco.version>0.8.12</jacoco.version>
 		<lombok.version>1.18.30</lombok.version>
 		<dagger.version>2.51</dagger.version>
 
