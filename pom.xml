@@ -230,6 +230,13 @@
 					</configuration>
 				</plugin>
 
+				<!-- https://maven.apache.org/plugins/maven-dependency-plugin/ -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.7.0</version>
+				</plugin>
+
 				<!-- TEST UNITAIRE -->
 				<!-- http://maven.apache.org/plugins/maven-surefire-plugin/ -->
 				<plugin>
