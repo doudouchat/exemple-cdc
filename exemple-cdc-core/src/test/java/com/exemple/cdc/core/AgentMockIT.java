@@ -36,8 +36,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.ResourceUtils;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.output.OutputFrame.OutputType;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import com.datastax.oss.driver.api.core.CqlSession;

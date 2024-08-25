@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-dependencies</artifactId>
-		<version>3.3.4</version>
+		<version>3.4.0</version>
 		<relativePath />
 	</parent>
 	<groupId>exemple</groupId>
@@ -28,7 +28,6 @@
 
 		<!-- VERSION -->
 		<cassandra.version>5.0.2</cassandra.version>
-		<io.confluent.kafka.version>7.7.1</io.confluent.kafka.version>
 		<zookeeper.version>3.9.3</zookeeper.version>
 		<jacoco.version>0.8.12</jacoco.version>
 		<dagger.version>2.52</dagger.version>
@@ -70,7 +69,7 @@
 			<dependency>
 				<groupId>io.confluent</groupId>
 				<artifactId>kafka-json-schema-serializer</artifactId>
-				<version>${io.confluent.kafka.version}</version>
+				<version>7.7.1</version>
 			</dependency>
 
 			<!-- CURATOR -->
