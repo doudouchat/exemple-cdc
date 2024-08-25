@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.kafka.KafkaContainer;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -55,13 +55,13 @@ class EventProducerTest {
     private KafkaContainer kafkaContainer;
 
     @Autowired
-    private GenericContainer embeddedZookeeper;
+    private GenericContainer<?> embeddedZookeeper;
 
     @BeforeAll
     public void createSchema() throws IOException {
 
         Map<String, Object> kafka = Map.of(
-                "bootstrap_servers", "localhost:" + kafkaContainer.getMappedPort(9093),
+                "bootstrap_servers", "localhost:" + kafkaContainer.getMappedPort(9092),
                 "timeout", 10,
                 "topics", Map.of("test", "topic_test"));
 

@@ -6,13 +6,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableConfigurationProperties(EmbeddedZookeeperConfigurationProperties.class)
-@Testcontainers
 @RequiredArgsConstructor
 public class EmbeddedZookeeperConfiguration {
 
@@ -20,7 +18,7 @@ public class EmbeddedZookeeperConfiguration {
 
     @Bean
     @ServiceConnection
-    public GenericContainer embeddedZookeeper() {
+    public GenericContainer<?> embeddedZookeeper() {
 
         return new GenericContainer<>("zookeeper:" + properties.getVersion())
                 .withNetworkAliases("zookeeper_network")

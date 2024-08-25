@@ -12,6 +12,6 @@ cassandra:
     conf: file:${project.build.testOutputDirectory}/conf/cdc
     loadAgent: true
 kafka:
-   version: ${io.confluent.kafka.version}
+   version: ${kafka.version}
 zookeeper:
    version: ${zookeeper.version}

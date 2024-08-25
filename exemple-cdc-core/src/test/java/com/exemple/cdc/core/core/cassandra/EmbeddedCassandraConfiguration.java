@@ -3,15 +3,13 @@ package com.exemple.cdc.core.core.cassandra;
 import java.io.IOException;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ResourceUtils;
-import org.testcontainers.containers.CassandraContainer;
-import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.cassandra.CassandraContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.MountableFile;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableConfigurationProperties(EmbeddedCassandraConfigurationProperties.class)
-@Testcontainers
 @Slf4j
 @RequiredArgsConstructor
 public class EmbeddedCassandraConfiguration {
@@ -27,8 +24,7 @@ public class EmbeddedCassandraConfiguration {
     private final EmbeddedCassandraConfigurationProperties cassandraProperties;
 
     @Bean
-    @ServiceConnection
-    public CassandraContainer<?> embeddedCassandra(KafkaContainer kafkaContainer) throws IOException {
+    public CassandraContainer embeddedCassandra(KafkaContainer kafkaContainer) throws IOException {
 
         var agent = ResourceUtils.getFile(cassandraProperties.getAgent()).getAbsolutePath();
         var lib = ResourceUtils.getFile(cassandraProperties.getLib()).getAbsolutePath();
@@ -47,7 +43,7 @@ public class EmbeddedCassandraConfiguration {
                     .append("-javaagent:/exemple-cdc-agent.jar");
         }
 
-        return new CassandraContainer<>("cassandra:" + cassandraProperties.getVersion())
+        return new CassandraContainer("cassandra:" + cassandraProperties.getVersion())
                 .withNetwork(kafkaContainer.getNetwork())
                 .withExposedPorts(9042, 6300, 6301)
                 .withCopyToContainer(MountableFile.forHostPath(agent), "/exemple-cdc-agent.jar")
