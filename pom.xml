@@ -1,5 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-dependencies</artifactId>
+		<version>3.3.3</version>
+		<relativePath />
+	</parent>
 	<groupId>exemple</groupId>
 	<artifactId>exemple-cdc</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
@@ -24,7 +30,6 @@
 		<cassandra.version>4.1.6</cassandra.version>
 		<io.confluent.kafka.version>7.7.0</io.confluent.kafka.version>
 		<jacoco.version>0.8.12</jacoco.version>
-		<lombok.version>1.18.34</lombok.version>
 		<dagger.version>2.52</dagger.version>
 
 		<!-- SONAR -->
@@ -43,15 +48,6 @@
 	<dependencyManagement>
 
 		<dependencies>
-
-			<!-- SPRING BOOT DEPENDENCIES -->
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>3.3.3</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
 
 			<!-- CASSANDRA -->
 
@@ -190,7 +186,6 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.13.0</version>
 					<configuration>
 						<compilerArgs>
 							<arg>-parameters</arg>
@@ -215,7 +210,6 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.4.2</version>
 					<configuration>
 						<archive>
 							<manifest>
@@ -230,30 +224,14 @@
 					</configuration>
 				</plugin>
 
-				<!-- https://maven.apache.org/plugins/maven-dependency-plugin/ -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.8.0</version>
-				</plugin>
-
 				<!-- TEST UNITAIRE -->
 				<!-- http://maven.apache.org/plugins/maven-surefire-plugin/ -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.4.0</version>
 					<configuration>
 						<argLine>${jacoco.test.agent.argLine}</argLine>
 					</configuration>
-				</plugin>
-
-				<!-- TEST INTEGRATION -->
-				<!-- http://maven.apache.org/surefire/maven-failsafe-plugin/ -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.4.0</version>
 				</plugin>
 
 				<!-- VERSION -->
@@ -261,7 +239,6 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
-					<version>2.17.1</version>
 					<configuration>
 						<processDependencyManagement>false</processDependencyManagement>
 						<outputFile>${project.build.directory}/outdated-dependencies.txt</outputFile>
@@ -306,28 +283,13 @@
 					<version>0.45.0</version>
 				</plugin>
 
-				<!-- HELPER -->
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>3.6.0</version>
-				</plugin>
-
 				<!-- SHADE PLUGIN -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.6.0</version>
 					<configuration>
 						<createDependencyReducedPom>false</createDependencyReducedPom>
 					</configuration>
-				</plugin>
-
-				<!-- ENFORCER -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>3.5.0</version>
 				</plugin>
 
 			</plugins>
