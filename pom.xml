@@ -27,7 +27,7 @@
 		<maven.compiler.target>11</maven.compiler.target>
 
 		<!-- VERSION -->
-		<cassandra.version>4.1.6</cassandra.version>
+		<cassandra.version>5.0.0</cassandra.version>
 		<io.confluent.kafka.version>7.7.0</io.confluent.kafka.version>
 		<jacoco.version>0.8.12</jacoco.version>
 		<dagger.version>2.52</dagger.version>

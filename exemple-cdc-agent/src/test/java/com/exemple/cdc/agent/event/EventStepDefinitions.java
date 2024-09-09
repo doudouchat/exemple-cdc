@@ -35,7 +35,7 @@ public class EventStepDefinitions {
     @Then("last message is")
     public void lastMessageIs(JsonNode body) {
 
-        await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
             assertThat(records.iterator()).toIterable().last().satisfies(record -> {
 

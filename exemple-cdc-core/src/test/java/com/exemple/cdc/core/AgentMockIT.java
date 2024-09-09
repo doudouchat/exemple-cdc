@@ -94,13 +94,13 @@ class AgentMockIT {
             }
 
             // Then check logs
-            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
                 assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).contains("Finished reading /opt/cassandra/data/cdc_raw/CommitLog");
 
             });
 
             // And check missing commit log
-            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
                 var result = embeddedCassandra.execInContainer("ls", "/opt/cassandra/data/cdc_raw");
                 assertThat(result.getStdout()).doesNotContainPattern("CommitLog-\\d+-" + segmentId + ".log");
                 assertThat(result.getStdout()).doesNotContain("CommitLog-\\d+-" + segmentId + "_cdc.idx");
@@ -131,7 +131,7 @@ class AgentMockIT {
             var event = insertEvent(UUID.randomUUID(), "SUCCESS_EVENT");
 
             // Then check logs
-            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
                 assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("SUCCESS EVENT " + event);
             });
         }
@@ -144,7 +144,7 @@ class AgentMockIT {
             this.failureEvent = insertEvent(UUID.randomUUID(), "FAILURE_EVENT");
 
             // Then check logs
-            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
                 assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("FAILURE EVENT " + this.failureEvent);
             });
         }
@@ -168,7 +168,7 @@ class AgentMockIT {
                     "nope");
 
             // Then check logs
-            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
                 assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "FAILURE EVENT " + this.failureEvent)).isEqualTo(2);
             });
         }
@@ -189,7 +189,7 @@ class AgentMockIT {
                     "force_success=true");
 
             // Then check logs
-            await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+            await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
                 assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "SUCCESS EVENT " + this.failureEvent)).isEqualTo(1);
                 assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "SUCCESS EVENT " + this.successEvent)).isEqualTo(1);
             });
