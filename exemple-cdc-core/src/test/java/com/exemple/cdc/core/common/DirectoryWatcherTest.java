@@ -82,7 +82,7 @@ public class DirectoryWatcherTest {
             assertThat(actualPath).isNull();
 
         }
-        
+
         @Test
         @Order(4)
         void createAgainFile() throws IOException, InterruptedException {
