@@ -100,11 +100,9 @@ class EventProducerTest {
                 .origin("test")
                 .originVersion("v1")
                 .date(OffsetDateTime.now())
-                .data((ObjectNode) MAPPER.readTree("{\n"
-                        + "  \"email\" : \"test@gmail.com\",\n"
-                        + "  \"name\" : \"Doe\",\n"
-                        + "  \"id\" : \"e143f715-f14e-44b4-90f1-47246661eb7d\"\n"
-                        + "}"))
+                .data((ObjectNode) MAPPER.readTree("""
+                                                   {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
+                                                   """))
                 .build();
 
         // When perform
@@ -117,11 +115,10 @@ class EventProducerTest {
 
                 LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
-                        + "  \"email\" : \"test@gmail.com\",\n"
-                        + "  \"name\" : \"Doe\",\n"
-                        + "  \"id\" : \"e143f715-f14e-44b4-90f1-47246661eb7d\"\n"
-                        + "}"));
+                assertThat(record.value())
+                        .isEqualTo(MAPPER.readTree("""
+                                                   {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
+                                                   """));
             });
         });
 
@@ -137,11 +134,9 @@ class EventProducerTest {
                 .origin("test")
                 .originVersion("v1")
                 .date(OffsetDateTime.now())
-                .data((ObjectNode) MAPPER.readTree("{\n"
-                        + "  \"email\" : \"test@gmail.com\",\n"
-                        + "  \"name\" : \"Doe\",\n"
-                        + "  \"id\" : \"2bc572fc-b6cd-4763-8ca2-6225689473b3\"\n"
-                        + "}"))
+                .data((ObjectNode) MAPPER.readTree("""
+                                                   {"email": "test@gmail.com", "name": "Doe", "id": "2bc572fc-b6cd-4763-8ca2-6225689473b3"}
+                                                   """))
                 .build();
 
         // And second event
@@ -151,11 +146,9 @@ class EventProducerTest {
                 .origin("test")
                 .originVersion("v1")
                 .date(OffsetDateTime.now().plusSeconds(1))
-                .data((ObjectNode) MAPPER.readTree("{\n"
-                        + "  \"email\" : \"test@gmail.com\",\n"
-                        + "  \"name\" : \"Doe\",\n"
-                        + "  \"id\" : \"2bc572fc-b6cd-4763-8ca2-6225689473b3\"\n"
-                        + "}"))
+                .data((ObjectNode) MAPPER.readTree("""
+                                                   {"email": "test@gmail.com", "name": "Doe", "id": "2bc572fc-b6cd-4763-8ca2-6225689473b3"}
+                                                   """))
                 .build();
 
         // When perform first event
@@ -186,11 +179,9 @@ class EventProducerTest {
                 .origin("test")
                 .originVersion("v1")
                 .date(OffsetDateTime.now())
-                .data((ObjectNode) MAPPER.readTree("{\n"
-                        + "  \"email\" : \"test@gmail.com\",\n"
-                        + "  \"name\" : \"Doe\",\n"
-                        + "  \"id\" : \"e143f715-f14e-44b4-90f1-47246661eb7d\"\n"
-                        + "}"))
+                .data((ObjectNode) MAPPER.readTree("""
+                                                   {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
+                                                   """))
                 .build();
 
         // When perform
@@ -211,11 +202,9 @@ class EventProducerTest {
                 .origin("test")
                 .originVersion("v1")
                 .date(OffsetDateTime.now())
-                .data((ObjectNode) MAPPER.readTree("{\n"
-                        + "  \"email\" : \"test@gmail.com\",\n"
-                        + "  \"name\" : \"Doe\",\n"
-                        + "  \"id\" : \"9e933e5e-34ff-4941-ba34-8af3e8965c22\"\n"
-                        + "}"))
+                .data((ObjectNode) MAPPER.readTree("""
+                                                   {"email": "test@gmail.com", "name": "Doe", "id": "9e933e5e-34ff-4941-ba34-8af3e8965c22"}
+                                                   """))
                 .build();
 
         // When perform

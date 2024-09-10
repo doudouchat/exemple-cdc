@@ -78,18 +78,17 @@ class ReloadAgentIT {
     void createEventBeforeLoadAgent() throws UnsupportedOperationException, IOException, InterruptedException {
 
         // Given perform
-        session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                + "48972a46-b48b-499f-aa63-534754497090,\n"
-                + "'2023-12-01 13:00',\n"
-                + "'app1',\n"
-                + "'v1',\n"
-                + "'CREATE_ACCOUNT',\n"
-                + "'{\n"
-                + "  \"email\": \"other@gmail.com\",\n"
-                + "  \"name\": \"Doe\"\n"
-                + "}',\n"
-                + "'2023-12-01'\n"
-                + ");");
+        session.execute("""
+                        INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                        48972a46-b48b-499f-aa63-534754497090,
+                        '2023-12-01 13:00',
+                        'app1',
+                        'v1',
+                        'CREATE_ACCOUNT',
+                        '{"email": "other@gmail.com", "name": "Doe"}',
+                        '2023-12-01'
+                        );
+                        """);
 
         // When perform agent
         var jvmOpts = new StringBuffer()
@@ -120,11 +119,10 @@ class ReloadAgentIT {
 
                 LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
-                        + "  \"email\" : \"other@gmail.com\",\n"
-                        + "  \"name\" : \"Doe\",\n"
-                        + "  \"id\" : \"48972a46-b48b-499f-aa63-534754497090\"\n"
-                        + "}"));
+                assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                        """
+                        {"email": "other@gmail.com", "name": "Doe", "id": "48972a46-b48b-499f-aa63-534754497090"}
+                        """));
             });
         });
 
@@ -135,18 +133,17 @@ class ReloadAgentIT {
     void createEventAfterLoadAgent() {
 
         // When perform
-        session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                + "55d7566c-077f-4a2f-9b80-b91c7aad2853,\n"
-                + "'2023-12-01 13:00',\n"
-                + "'app1',\n"
-                + "'v1',\n"
-                + "'CREATE_ACCOUNT',\n"
-                + "'{\n"
-                + "  \"email\": \"other@gmail.com\",\n"
-                + "  \"name\": \"Doe\"\n"
-                + "}',\n"
-                + "'2023-12-01'\n"
-                + ");");
+        session.execute("""
+                        INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                        55d7566c-077f-4a2f-9b80-b91c7aad2853,
+                        '2023-12-01 13:00',
+                        'app1',
+                        'v1',
+                        'CREATE_ACCOUNT',
+                        '{"email": "other@gmail.com", "name": "Doe"}',
+                        '2023-12-01'
+                        );
+                        """);
 
         // Then check event
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
@@ -155,11 +152,10 @@ class ReloadAgentIT {
 
                 LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
-                        + "  \"email\" : \"other@gmail.com\",\n"
-                        + "  \"name\" : \"Doe\",\n"
-                        + "  \"id\" : \"55d7566c-077f-4a2f-9b80-b91c7aad2853\"\n"
-                        + "}"));
+                assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                        """
+                        {"email": "other@gmail.com", "name": "Doe", "id": "55d7566c-077f-4a2f-9b80-b91c7aad2853"}
+                        """));
             });
         });
 
