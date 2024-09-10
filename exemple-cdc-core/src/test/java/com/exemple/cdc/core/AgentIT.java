@@ -82,18 +82,17 @@ class AgentIT {
         void createFirstEvent() {
 
             // When perform
-            session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                    + "e143f715-f14e-44b4-90f1-47246661eb7d,\n"
-                    + "'2023-12-01 12:00',\n"
-                    + "'app1',\n"
-                    + "'v1',\n"
-                    + "'CREATE_ACCOUNT',\n"
-                    + "'{\n"
-                    + "  \"email\": \"test@gmail.com\",\n"
-                    + "  \"name\": \"Doe\"\n"
-                    + "}',\n"
-                    + "'2023-12-01'\n"
-                    + ");");
+            session.execute("""
+                            INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                             e143f715-f14e-44b4-90f1-47246661eb7d,
+                             '2023-12-01 12:00',
+                             'app1',
+                             'v1',
+                             'CREATE_ACCOUNT',
+                             '{"email": "test@gmail.com", "name": "Doe"}',
+                             '2023-12-01'
+                             );
+                            """);
 
             // Then check event
             await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
@@ -102,11 +101,10 @@ class AgentIT {
 
                     LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                    assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
-                            + "  \"email\" : \"test@gmail.com\",\n"
-                            + "  \"name\" : \"Doe\",\n"
-                            + "  \"id\" : \"e143f715-f14e-44b4-90f1-47246661eb7d\"\n"
-                            + "}"));
+                    assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                            """
+                            {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
+                            """));
                 });
             });
 
@@ -117,18 +115,17 @@ class AgentIT {
         void createSecondEvent() {
 
             // When perform
-            session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                    + "7977b564-5f53-4296-bc0a-438900e089ad,\n"
-                    + "'2023-12-01 13:00',\n"
-                    + "'app1',\n"
-                    + "'v1',\n"
-                    + "'CREATE_ACCOUNT',\n"
-                    + "'{\n"
-                    + "  \"email\": \"other@gmail.com\",\n"
-                    + "  \"name\": \"Doe\"\n"
-                    + "}',\n"
-                    + "'2023-12-01'\n"
-                    + ");");
+            session.execute("""
+                            INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                            7977b564-5f53-4296-bc0a-438900e089ad,
+                            '2023-12-01 13:00',
+                            'app1',
+                            'v1',
+                            'CREATE_ACCOUNT',
+                            '{"email": "other@gmail.com", "name": "Doe"}',
+                            '2023-12-01'
+                            );
+                             """);
 
             // Then check event
             await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
@@ -137,11 +134,10 @@ class AgentIT {
 
                     LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                    assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
-                            + "  \"email\" : \"other@gmail.com\",\n"
-                            + "  \"name\" : \"Doe\",\n"
-                            + "  \"id\" : \"7977b564-5f53-4296-bc0a-438900e089ad\"\n"
-                            + "}"));
+                    assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                            """
+                            {"email": "other@gmail.com", "name": "Doe", "id": "7977b564-5f53-4296-bc0a-438900e089ad"}
+                            """));
                 });
             });
 
@@ -152,23 +148,20 @@ class AgentIT {
         void createEventInBatch() {
 
             // When perform
-            session.execute("BEGIN BATCH "
-                    + "INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                    + "547700ac-824e-45f4-a6ee-35773259a8c3,\n"
-                    + "'2023-12-01 12:00',\n"
-                    + "'app1',\n"
-                    + "'v1',\n"
-                    + "'CREATE_ACCOUNT',\n"
-                    + "'{\n"
-                    + "  \"email\": \"test@gmail.com\",\n"
-                    + "  \"name\": \"Doe\"\n"
-                    + "}',\n"
-                    + "'2023-12-01'\n"
-                    + ");\n"
-                    + "INSERT INTO test_other (id) VALUES (\n"
-                    + "547700ac-824e-45f4-a6ee-35773259a8c3\n"
-                    + ");\n"
-                    + "APPLY BATCH");
+            session.execute("""
+                            BEGIN BATCH
+                            INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                            547700ac-824e-45f4-a6ee-35773259a8c3,
+                            '2023-12-01 12:00',
+                            'app1',
+                            'v1',
+                            'CREATE_ACCOUNT',
+                            '{"email": "test@gmail.com", "name": "Doe"}',
+                            '2023-12-01'
+                            );
+                            INSERT INTO test_other (id) VALUES (547700ac-824e-45f4-a6ee-35773259a8c3);
+                            APPLY BATCH
+                            """);
 
             // Then check event
             await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
@@ -177,11 +170,10 @@ class AgentIT {
 
                     LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                    assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
-                            + "  \"email\" : \"test@gmail.com\",\n"
-                            + "  \"name\" : \"Doe\",\n"
-                            + "  \"id\" : \"547700ac-824e-45f4-a6ee-35773259a8c3\"\n"
-                            + "}"));
+                    assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                            """
+                            {"email": "test@gmail.com", "name": "Doe", "id": "547700ac-824e-45f4-a6ee-35773259a8c3"}
+                            """));
                 });
             });
 
@@ -192,10 +184,9 @@ class AgentIT {
         void createEventWithoutData() {
 
             // When perform
-            session.execute("INSERT INTO test_event (id, date) VALUES (\n"
-                    + "4c95bfb2-5190-41a5-bfe0-598d838fcd83,\n"
-                    + "'2023-12-01 13:00'"
-                    + ");");
+            session.execute("""
+                            INSERT INTO test_event (id, date) VALUES (4c95bfb2-5190-41a5-bfe0-598d838fcd83,'2023-12-01 13:00');
+                            """);
 
             // Then check event
             await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
@@ -204,9 +195,10 @@ class AgentIT {
 
                     LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                    assertThat(record.value()).isEqualTo(MAPPER.readTree("{\n"
-                            + "  \"id\" : \"4c95bfb2-5190-41a5-bfe0-598d838fcd83\"\n"
-                            + "}"));
+                    assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                            """
+                            {"id": "4c95bfb2-5190-41a5-bfe0-598d838fcd83"}
+                            """));
                 });
             });
 
@@ -221,18 +213,17 @@ class AgentIT {
         @BeforeAll
         void createEvent() {
 
-            session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                    + "50f9e704-b84c-4225-8883-b7b5d6114634,\n"
-                    + "'2023-12-01 12:00',\n"
-                    + "'app1',\n"
-                    + "'v1',\n"
-                    + "'CREATE_ACCOUNT',\n"
-                    + "'{\n"
-                    + "  \"email\": \"test@gmail.com\",\n"
-                    + "  \"name\": \"Doe\"\n"
-                    + "}',\n"
-                    + "'2023-12-01'\n"
-                    + ");");
+            session.execute("""
+                            INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                            50f9e704-b84c-4225-8883-b7b5d6114634,
+                            '2023-12-01 12:00',
+                            'app1',
+                            'v1',
+                            'CREATE_ACCOUNT',
+                            '{"email": "test@gmail.com", "name": "Doe"}',
+                            '2023-12-01'
+                            );
+                            """);
 
         }
 
@@ -240,12 +231,10 @@ class AgentIT {
         void updateEvent() {
 
             // When perform
-            session.execute("UPDATE test_event \n"
-                    + "SET data = '{\n"
-                    + "  \"email\": \"test2@gmail.com\",\n"
-                    + "  \"name\": \"Doe\"\n"
-                    + "}'\n"
-                    + "WHERE id = 50f9e704-b84c-4225-8883-b7b5d6114634 AND date = '2023-12-01 12:00'");
+            session.execute("""
+                            UPDATE test_event SET data = '{"email": "test2@gmail.com", "name": "Doe"}'
+                            WHERE id = 50f9e704-b84c-4225-8883-b7b5d6114634 AND date = '2023-12-01 12:00'
+                            """);
 
             // Then check logs
             await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
@@ -263,18 +252,17 @@ class AgentIT {
         @BeforeAll
         void createEvent() {
 
-            session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                    + "4722f55d-b33d-411b-9fdf-b66fb17820aa,\n"
-                    + "'2023-12-01 12:00',\n"
-                    + "'app1',\n"
-                    + "'v1',\n"
-                    + "'CREATE_ACCOUNT',\n"
-                    + "'{\n"
-                    + "  \"email\": \"test@gmail.com\",\n"
-                    + "  \"name\": \"Doe\"\n"
-                    + "}',\n"
-                    + "'2023-12-01'\n"
-                    + ");");
+            session.execute("""
+                            INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                            4722f55d-b33d-411b-9fdf-b66fb17820aa,
+                            '2023-12-01 12:00',
+                            'app1',
+                            'v1',
+                            'CREATE_ACCOUNT',
+                            '{"email": "test@gmail.com", "name": "Doe"}',
+                            '2023-12-01'
+                             );
+                            """);
 
         }
 
@@ -282,9 +270,9 @@ class AgentIT {
         void deleteEvent() {
 
             // When delete Event
-            session.execute("DELETE \n"
-                    + "FROM test_event \n"
-                    + "WHERE id = 4722f55d-b33d-411b-9fdf-b66fb17820aa AND date = '2023-12-01 12:00'");
+            session.execute("""
+                            DELETE FROM test_event WHERE id = 4722f55d-b33d-411b-9fdf-b66fb17820aa AND date = '2023-12-01 12:00'
+                            """);
 
             // Then check logs
             await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {

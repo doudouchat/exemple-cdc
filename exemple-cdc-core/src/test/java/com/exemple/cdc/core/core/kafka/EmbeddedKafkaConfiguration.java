@@ -1,7 +1,5 @@
 package com.exemple.cdc.core.core.kafka;
 
-import java.io.IOException;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +21,7 @@ public class EmbeddedKafkaConfiguration {
 
     @Bean
     @ServiceConnection
-    public KafkaContainer embeddedKafka() throws IOException {
+    public KafkaContainer embeddedKafka() {
 
         return new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:" + properties.getVersion()))
                 .withNetworkAliases("kafka_network")
