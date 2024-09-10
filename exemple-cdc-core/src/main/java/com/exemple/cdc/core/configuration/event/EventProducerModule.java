@@ -7,9 +7,9 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.kafka.clients.producer.Producer;
 
 import com.exemple.cdc.core.configuration.kafka.DaggerKafkaProducerComponent;
-import com.exemple.cdc.core.configuration.zookeeper.DaggerZookeeperClientComponent;
 import com.exemple.cdc.core.configuration.kafka.KafkaProducerModule;
 import com.exemple.cdc.core.configuration.kafka.KafkaProperties;
+import com.exemple.cdc.core.configuration.zookeeper.DaggerZookeeperClientComponent;
 import com.exemple.cdc.core.configuration.zookeeper.ZookeeperClientModule;
 import com.exemple.cdc.core.configuration.zookeeper.ZookeeperProperties;
 import com.exemple.cdc.core.event.EventProducer;
