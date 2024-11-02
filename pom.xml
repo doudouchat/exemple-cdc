@@ -29,7 +29,7 @@
 		<!-- VERSION -->
 		<cassandra.version>5.0.2</cassandra.version>
 		<io.confluent.kafka.version>7.7.1</io.confluent.kafka.version>
-		<zookeeper.version>3.9.2</zookeeper.version>
+		<zookeeper.version>3.9.3</zookeeper.version>
 		<jacoco.version>0.8.12</jacoco.version>
 		<dagger.version>2.52</dagger.version>
 
