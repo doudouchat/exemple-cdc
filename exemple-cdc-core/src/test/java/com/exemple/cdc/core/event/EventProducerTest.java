@@ -3,6 +3,7 @@ package com.exemple.cdc.core.event;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -95,6 +96,7 @@ class EventProducerTest {
 
         // Setup event
         var event = CdcEvent.builder()
+                .key("e143f715-f14e-44b4-90f1-47246661eb7d")
                 .resource("test")
                 .eventType("CREATION")
                 .origin("test")
@@ -115,10 +117,12 @@ class EventProducerTest {
 
                 LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                assertThat(record.value())
-                        .isEqualTo(MAPPER.readTree("""
-                                                   {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
-                                                   """));
+                assertAll(
+                        () -> assertThat(record.key()).isEqualTo("e143f715-f14e-44b4-90f1-47246661eb7d"),
+                        () -> assertThat(record.value())
+                                .isEqualTo(MAPPER.readTree("""
+                                                           {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
+                                                           """)));
             });
         });
 
@@ -129,6 +133,7 @@ class EventProducerTest {
 
         // Setup one event
         var event1 = CdcEvent.builder()
+                .key("2bc572fc-b6cd-4763-8ca2-6225689473b3")
                 .resource("test")
                 .eventType("UPDATE")
                 .origin("test")
@@ -141,6 +146,7 @@ class EventProducerTest {
 
         // And second event
         var event2 = CdcEvent.builder()
+                .key("2bc572fc-b6cd-4763-8ca2-6225689473b3")
                 .resource("test")
                 .eventType("UPDATE")
                 .origin("test")
@@ -174,6 +180,7 @@ class EventProducerTest {
 
         // Setup event
         var event = CdcEvent.builder()
+                .key("e143f715-f14e-44b4-90f1-47246661eb7d")
                 .resource("unknown")
                 .eventType("CREATION")
                 .origin("test")
@@ -197,6 +204,7 @@ class EventProducerTest {
 
         // Setup event
         var event = CdcEvent.builder()
+                .key("9e933e5e-34ff-4941-ba34-8af3e8965c22")
                 .resource("test")
                 .eventType("CREATION")
                 .origin("test")

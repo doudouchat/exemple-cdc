@@ -29,6 +29,7 @@ public class CdcEvent {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private final String key;
     private final ObjectNode data;
     private final String resource;
     private final String eventType;
@@ -44,6 +45,12 @@ public class CdcEvent {
                 .map((ColumnMetadata column) -> convertToJsonNode(row, column))
                 .map(ObjectNode.class::cast)
                 .orElseGet(MAPPER::createObjectNode);
+
+        key = modification.metadata().partitionKeyColumns().stream()
+                .findFirst()
+                .map((ColumnMetadata column) -> column.type.compose(modification.partitionKey().getKey()))
+                .map(String::valueOf)
+                .orElseThrow();
 
         modification.metadata().partitionKeyColumns().forEach((ColumnMetadata column) -> data.set(column.name.toCQLString(),
                 MAPPER.convertValue(column.type.compose(modification.partitionKey().getKey()), JsonNode.class)));
