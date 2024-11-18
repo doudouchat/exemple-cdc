@@ -1,7 +1,6 @@
 package com.exemple.cdc.core.event;
 
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.curator.framework.CuratorFramework;
@@ -66,7 +65,7 @@ public class EventProducer {
                             topic,
                             null,
                             event.getDate().toInstant().toEpochMilli(),
-                            UUID.randomUUID().toString(),
+                            event.getKey(),
                             data);
                     productRecord.headers()
                             .add(X_RESOURCE, resource.getBytes(StandardCharsets.UTF_8))

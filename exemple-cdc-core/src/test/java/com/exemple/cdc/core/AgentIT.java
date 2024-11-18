@@ -2,6 +2,7 @@ package com.exemple.cdc.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -101,10 +102,12 @@ class AgentIT {
 
                     LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                    assertThat(record.value()).isEqualTo(MAPPER.readTree(
-                            """
-                            {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
-                            """));
+                    assertAll(
+                            () -> assertThat(record.key()).isEqualTo("e143f715-f14e-44b4-90f1-47246661eb7d"),
+                            () -> assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                                    """
+                                    {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
+                                    """)));
                 });
             });
 
@@ -134,10 +137,12 @@ class AgentIT {
 
                     LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                    assertThat(record.value()).isEqualTo(MAPPER.readTree(
-                            """
-                            {"email": "other@gmail.com", "name": "Doe", "id": "7977b564-5f53-4296-bc0a-438900e089ad"}
-                            """));
+                    assertAll(
+                            () -> assertThat(record.key()).isEqualTo("7977b564-5f53-4296-bc0a-438900e089ad"),
+                            () -> assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                                    """
+                                    {"email": "other@gmail.com", "name": "Doe", "id": "7977b564-5f53-4296-bc0a-438900e089ad"}
+                                    """)));
                 });
             });
 
@@ -170,13 +175,14 @@ class AgentIT {
 
                     LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                    assertThat(record.value()).isEqualTo(MAPPER.readTree(
-                            """
-                            {"email": "test@gmail.com", "name": "Doe", "id": "547700ac-824e-45f4-a6ee-35773259a8c3"}
-                            """));
+                    assertAll(
+                            () -> assertThat(record.key()).isEqualTo("547700ac-824e-45f4-a6ee-35773259a8c3"),
+                            () -> assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                                    """
+                                    {"email": "test@gmail.com", "name": "Doe", "id": "547700ac-824e-45f4-a6ee-35773259a8c3"}
+                                    """)));
                 });
             });
-
         }
 
         @Test
@@ -195,10 +201,12 @@ class AgentIT {
 
                     LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
 
-                    assertThat(record.value()).isEqualTo(MAPPER.readTree(
-                            """
-                            {"id": "4c95bfb2-5190-41a5-bfe0-598d838fcd83"}
-                            """));
+                    assertAll(
+                            () -> assertThat(record.key()).isEqualTo("4c95bfb2-5190-41a5-bfe0-598d838fcd83"),
+                            () -> assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                                    """
+                                    {"id": "4c95bfb2-5190-41a5-bfe0-598d838fcd83"}
+                                    """)));
                 });
             });
 
