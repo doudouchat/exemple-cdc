@@ -115,11 +115,11 @@ class ReloadAgentIT {
         // And check event
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
-            assertThat(records.iterator()).toIterable().last().satisfies(record -> {
+            assertThat(records.iterator()).toIterable().last().satisfies(event -> {
 
-                LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
+                LOG.debug("received event {}:{}", event.key(), event.value().toPrettyString());
 
-                assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                assertThat(event.value()).isEqualTo(MAPPER.readTree(
                         """
                         {"email": "other@gmail.com", "name": "Doe", "id": "48972a46-b48b-499f-aa63-534754497090"}
                         """));
@@ -148,11 +148,11 @@ class ReloadAgentIT {
         // Then check event
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
-            assertThat(records.iterator()).toIterable().last().satisfies(record -> {
+            assertThat(records.iterator()).toIterable().last().satisfies(event -> {
 
-                LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
+                LOG.debug("received event {}:{}", event.key(), event.value().toPrettyString());
 
-                assertThat(record.value()).isEqualTo(MAPPER.readTree(
+                assertThat(event.value()).isEqualTo(MAPPER.readTree(
                         """
                         {"email": "other@gmail.com", "name": "Doe", "id": "55d7566c-077f-4a2f-9b80-b91c7aad2853"}
                         """));

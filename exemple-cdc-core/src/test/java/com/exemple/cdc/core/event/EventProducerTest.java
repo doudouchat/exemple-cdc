@@ -95,7 +95,7 @@ class EventProducerTest {
     void sendOneEvent() throws IOException {
 
         // Setup event
-        var event = CdcEvent.builder()
+        var cdcEvent = CdcEvent.builder()
                 .key("e143f715-f14e-44b4-90f1-47246661eb7d")
                 .resource("test")
                 .eventType("CREATION")
@@ -108,18 +108,18 @@ class EventProducerTest {
                 .build();
 
         // When perform
-        this.eventProducer.send(event);
+        this.eventProducer.send(cdcEvent);
 
         // Then check event
         ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
-            assertThat(records.iterator()).toIterable().last().satisfies(record -> {
+            assertThat(records.iterator()).toIterable().last().satisfies(event -> {
 
-                LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
+                LOG.debug("received event {}:{}", event.key(), event.value().toPrettyString());
 
                 assertAll(
-                        () -> assertThat(record.key()).isEqualTo("e143f715-f14e-44b4-90f1-47246661eb7d"),
-                        () -> assertThat(record.value())
+                        () -> assertThat(event.key()).isEqualTo("e143f715-f14e-44b4-90f1-47246661eb7d"),
+                        () -> assertThat(event.value())
                                 .isEqualTo(MAPPER.readTree("""
                                                            {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
                                                            """)));

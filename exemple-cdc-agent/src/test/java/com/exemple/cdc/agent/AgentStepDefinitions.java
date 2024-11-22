@@ -16,7 +16,7 @@ public class AgentStepDefinitions {
 
     @Given("stop agent")
     public void stop() {
-
+        // NOP
     }
 
     @Given("reload agent")

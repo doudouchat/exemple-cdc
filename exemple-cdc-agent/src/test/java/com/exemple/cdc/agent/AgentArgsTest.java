@@ -23,31 +23,8 @@ class AgentArgsTest {
 
     @ParameterizedTest
     @NullAndEmptySource
-    void failIfNullOrEmpty(String mainArgs) {
-
-        // When instance
-        var throwable = catchThrowable(() -> new AgentArgs(mainArgs));
-
-        // Then check exception
-        assertThat(throwable).isInstanceOf(IllegalArgumentException.class).hasMessage("conf is required");
-
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { " ", "conf" })
+    @ValueSource(strings = { " ", "conf", "key=value", "conf=" })
     void failIfNoRespectPattern(String mainArgs) {
-
-        // When instance
-        var throwable = catchThrowable(() -> new AgentArgs(mainArgs));
-
-        // Then check exception
-        assertThat(throwable).isInstanceOf(IllegalArgumentException.class).hasMessage("conf is required");
-
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "key=value", "conf=" })
-    void failIfConfIsMissing(String mainArgs) {
 
         // When instance
         var throwable = catchThrowable(() -> new AgentArgs(mainArgs));
