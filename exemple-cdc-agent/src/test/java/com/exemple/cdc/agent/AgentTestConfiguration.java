@@ -54,6 +54,7 @@ public class AgentTestConfiguration {
 
             @Override
             public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+                // NOP
             }
 
             @Override
@@ -66,6 +67,7 @@ public class AgentTestConfiguration {
 
             @Override
             public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+                // NOP
             }
 
             @Override

@@ -37,10 +37,10 @@ public class EventStepDefinitions {
 
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
-            assertThat(records.iterator()).toIterable().last().satisfies(record -> {
+            assertThat(records.iterator()).toIterable().last().satisfies(event -> {
 
-                LOG.debug("received event {}:{}", record.key(), record.value().toPrettyString());
-                assertThat(record.value()).isEqualTo(body);
+                LOG.debug("received event {}:{}", event.key(), event.value().toPrettyString());
+                assertThat(event.value()).isEqualTo(body);
             });
         });
     }
