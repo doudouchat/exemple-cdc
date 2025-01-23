@@ -26,6 +26,7 @@ public class EmbeddedKafkaConfiguration {
                 .withNetworkAliases("kafka_network")
                 .withNetwork(Network.SHARED)
                 .withExposedPorts(9092, 9093)
+                .withEnv("KAFKA_LISTENERS", "PLAINTEXT://:9092,BROKER://:9093,CONTROLLER://:9094")
                 .withLogConsumer(new Slf4jLogConsumer(LOG));
     }
 
