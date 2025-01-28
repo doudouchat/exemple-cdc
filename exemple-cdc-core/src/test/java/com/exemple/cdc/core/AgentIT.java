@@ -215,6 +215,50 @@ class AgentIT {
     }
 
     @Nested
+    class CreateEventWithCompositeKey {
+
+        @Test
+        void createEvent() {
+
+            // When perform
+            session.execute("""
+                            INSERT INTO test_with_composite_key_event (id1, id2, date, application, version, event_type, data, local_date) VALUES (
+                             b7170cc4-0c01-4049-9417-0a31abb57602,
+                             fa3a2317-ebb9-4d64-8138-8acf02c69be6,
+                             '2023-12-01 12:00',
+                             'app1',
+                             'v1',
+                             'CREATE_ACCOUNT',
+                             '{"email": "test@gmail.com", "name": "Doe"}',
+                             '2023-12-01'
+                             );
+                            """);
+
+            // Then check event
+            await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
+                ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
+                assertThat(records.iterator()).toIterable().last().satisfies(event -> {
+
+                    LOG.debug("received event {}:{}", event.key(), event.value().toPrettyString());
+
+                    assertAll(
+                            () -> assertThat(event.key()).isEqualTo("b7170cc4-0c01-4049-9417-0a31abb57602.fa3a2317-ebb9-4d64-8138-8acf02c69be6"),
+                            () -> assertThat(event.value()).isEqualTo(MAPPER.readTree(
+                                    """
+                                    {
+                                      "email": "test@gmail.com", 
+                                      "name": "Doe", 
+                                      "id1": "b7170cc4-0c01-4049-9417-0a31abb57602", 
+                                      "id2": "fa3a2317-ebb9-4d64-8138-8acf02c69be6"
+                                    }
+                                    """)));
+                });
+            });
+
+        }
+    }
+
+    @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     class UpdateEvent {
 

@@ -5,11 +5,13 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 import org.apache.cassandra.db.partitions.PartitionUpdate;
 import org.apache.cassandra.db.rows.Row;
 import org.apache.cassandra.schema.ColumnMetadata;
 
+import com.exemple.cdc.core.common.PartitionKeyFactory.PartitionKey;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -46,14 +48,23 @@ public class CdcEvent {
                 .map(ObjectNode.class::cast)
                 .orElseGet(MAPPER::createObjectNode);
 
-        key = modification.metadata().partitionKeyColumns().stream()
-                .findFirst()
-                .map((ColumnMetadata column) -> column.type.compose(modification.partitionKey().getKey()))
-                .map(String::valueOf)
-                .orElseThrow();
+        var buildPartitionKey = new PartitionKeyFactory(modification);
+        if (buildPartitionKey.isCompositeKey()) {
+            key = buildPartitionKey.getCompositeKey().stream()
+                    .mapMulti((PartitionKey partitionKey, Consumer<PartitionKey> build) -> {
+                        data.set(partitionKey.key(), MAPPER.convertValue(partitionKey.value(), JsonNode.class));
+                        build.accept(partitionKey);
+                    })
+                    .map(PartitionKey::value)
+                    .map(String::valueOf)
+                    .reduce((key1, key2) -> key1 + "." + key2)
+                    .orElseThrow();
 
-        modification.metadata().partitionKeyColumns().forEach((ColumnMetadata column) -> data.set(column.name.toCQLString(),
-                MAPPER.convertValue(column.type.compose(modification.partitionKey().getKey()), JsonNode.class)));
+        } else {
+            var partitionKey = buildPartitionKey.getSimpleKey();
+            key = partitionKey.value().toString();
+            data.set(partitionKey.key(), MAPPER.convertValue(partitionKey.value(), JsonNode.class));
+        }
 
         date = modification.metadata().clusteringColumns().stream().findFirst()
                 .map((ColumnMetadata column) -> {
