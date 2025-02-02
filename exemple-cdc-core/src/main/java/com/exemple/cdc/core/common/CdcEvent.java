@@ -1,114 +1,72 @@
 package com.exemple.cdc.core.common;
 
-import java.time.Instant;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Locale;
-import java.util.function.Consumer;
+import java.util.Map;
 
-import org.apache.cassandra.db.partitions.PartitionUpdate;
-import org.apache.cassandra.db.rows.Row;
-import org.apache.cassandra.schema.ColumnMetadata;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.exemple.cdc.core.common.PartitionKeyFactory.PartitionKey;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.ToString;
+import lombok.Singular;
 
 @Builder
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-@Getter
-@ToString
-public class CdcEvent {
+public record CdcEvent(String key,
+                       String resource,
+                       JsonNode data,
+                       @Singular Map<String, byte[]> headers,
+                       OffsetDateTime date) {
+
+    public static final String X_ORIGIN = "X_Origin";
+
+    public static final String X_ORIGIN_VERSION = "X_Origin_Version";
+
+    public static final String X_RESOURCE = "X_Resource";
+
+    public static final String X_EVENT_TYPE = "X_Event_Type";
+
+    public static final String X_USER = "X_User";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final String key;
-    private final ObjectNode data;
-    private final String resource;
-    private final String eventType;
-    private final String origin;
-    private final String originVersion;
-    private final OffsetDateTime date;
-
-    public CdcEvent(Row row, PartitionUpdate modification) {
-
-        data = row.columns().stream()
-                .filter((ColumnMetadata column) -> "data".equals(column.name.toCQLString()))
-                .findFirst()
-                .map((ColumnMetadata column) -> convertToJsonNode(row, column))
-                .map(ObjectNode.class::cast)
-                .orElseGet(MAPPER::createObjectNode);
-
-        var buildPartitionKey = new PartitionKeyFactory(modification);
-        if (buildPartitionKey.isCompositeKey()) {
-            key = buildPartitionKey.getCompositeKey().stream()
-                    .mapMulti((PartitionKey partitionKey, Consumer<PartitionKey> build) -> {
-                        data.set(partitionKey.key(), MAPPER.convertValue(partitionKey.value(), JsonNode.class));
-                        build.accept(partitionKey);
-                    })
-                    .map(PartitionKey::value)
-                    .map(String::valueOf)
-                    .reduce((key1, key2) -> key1 + "." + key2)
-                    .orElseThrow();
-
-        } else {
-            var partitionKey = buildPartitionKey.getSimpleKey();
-            key = partitionKey.value().toString();
-            data.set(partitionKey.key(), MAPPER.convertValue(partitionKey.value(), JsonNode.class));
-        }
-
-        date = modification.metadata().clusteringColumns().stream().findFirst()
-                .map((ColumnMetadata column) -> {
-                    var datetime = ((Date) column.type.compose(row.clustering().bufferAt(column.position()))).getTime();
-                    return OffsetDateTime.ofInstant(Instant.ofEpochMilli(datetime), ZoneId.systemDefault());
-                }).orElseThrow();
-
-        originVersion = row.columns().stream()
-                .filter((ColumnMetadata column) -> "version".equals(column.name.toCQLString()))
-                .findFirst()
-                .map((ColumnMetadata column) -> convertToString(row, column))
-                .orElse("");
-
-        origin = row.columns().stream()
-                .filter((ColumnMetadata column) -> "application".equals(column.name.toCQLString()))
-                .findFirst()
-                .map((ColumnMetadata column) -> convertToString(row, column))
-                .orElse("");
-
-        eventType = row.columns().stream()
-                .filter((ColumnMetadata column) -> "event_type".equals(column.name.toCQLString()))
-                .findFirst()
-                .map((ColumnMetadata column) -> convertToString(row, column))
-                .orElse("");
-
-        resource = modification.metadata().name.replace("_event", "").toUpperCase(Locale.getDefault());
-
-    }
-
-    public String getId() {
+    public String id() {
         return date.toInstant().toEpochMilli() + "" + data.toString();
     }
 
-    @SneakyThrows
-    private static JsonNode convertToJsonNode(Row row, ColumnMetadata column) {
-        var cell = row.getCell(column);
-        return MAPPER.readTree(column.type.compose(cell.buffer()).toString());
+    public ProducerRecord<String, JsonNode> createProducerRecord(String topic) {
 
+        var productRecord = new ProducerRecord<String, JsonNode>(
+                topic,
+                null,
+                date.toInstant().toEpochMilli(),
+                key,
+                data);
+        headers.entrySet().forEach(header -> productRecord.headers().add(header.getKey(), header.getValue()));
+
+        return productRecord;
     }
 
-    private static String convertToString(Row row, ColumnMetadata column) {
-        var cell = row.getCell(column);
-        return column.type.compose(cell.buffer()).toString();
+    public static class CdcEventBuilder {
+        public CdcEventBuilder data(PartitionKey partitionKey) {
+            ((ObjectNode) this.data).set(partitionKey.key(), MAPPER.convertValue(partitionKey.value(), JsonNode.class));
+            return this;
+        }
 
+        public CdcEventBuilder data(JsonNode value) {
+            this.data = value;
+            return this;
+        }
+
+        public CdcEventBuilder resource(String value) {
+            this.resource = value;
+            this.header(CdcEvent.X_RESOURCE, this.resource.toUpperCase(Locale.getDefault()).getBytes(StandardCharsets.UTF_8));
+            return this;
+        }
     }
 
 }

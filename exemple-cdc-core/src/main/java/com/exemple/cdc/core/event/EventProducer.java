@@ -9,7 +9,6 @@ import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
 import org.apache.curator.framework.recipes.nodes.PersistentNode;
 import org.apache.curator.framework.recipes.nodes.PersistentTtlNode;
 import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.zookeeper.CreateMode;
 
 import com.exemple.cdc.core.common.CdcEvent;
@@ -25,14 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EventProducer {
 
-    public static final String X_ORIGIN = "X_Origin";
-
-    public static final String X_ORIGIN_VERSION = "X_Origin_Version";
-
-    public static final String X_RESOURCE = "X_Resource";
-
-    public static final String X_EVENT_TYPE = "X_Event_Type";
-
     private final Producer<String, JsonNode> kafkaProducer;
 
     private final KafkaProperties kafkaProperties;
@@ -46,38 +37,26 @@ public class EventProducer {
 
         try (PersistentTtlNode node = createEvent(event)) {
 
-            InterProcessLock lock = new InterProcessSemaphoreMutex(zookeeperClient, "/" + event.getResource() + event.getId());
+            InterProcessLock lock = new InterProcessSemaphoreMutex(zookeeperClient, "/" + event.resource() + event.id());
 
             try {
                 lock.acquire();
 
-                var status = new String(zookeeperClient.getData().forPath("/" + event.getResource() + "/" + event.getId()), StandardCharsets.UTF_8);
+                var status = new String(zookeeperClient.getData().forPath("/" + event.resource() + "/" + event.id()), StandardCharsets.UTF_8);
 
                 if (!"COMPLETED".equals(status)) {
 
-                    var resource = event.getResource();
-                    var topic = kafkaProperties.getTopics().computeIfAbsent(resource.toLowerCase(), (String absentResource) -> {
+                    var topic = kafkaProperties.getTopics().computeIfAbsent(event.resource(), (String absentResource) -> {
                         throw new IllegalStateException(absentResource + " has not any topic");
                     });
-                    var data = event.getData();
 
-                    var productRecord = new ProducerRecord<String, JsonNode>(
-                            topic,
-                            null,
-                            event.getDate().toInstant().toEpochMilli(),
-                            event.getKey(),
-                            data);
-                    productRecord.headers()
-                            .add(X_RESOURCE, resource.getBytes(StandardCharsets.UTF_8))
-                            .add(X_EVENT_TYPE, event.getEventType().getBytes(StandardCharsets.UTF_8))
-                            .add(X_ORIGIN, event.getOrigin().getBytes(StandardCharsets.UTF_8))
-                            .add(X_ORIGIN_VERSION, event.getOriginVersion().getBytes(StandardCharsets.UTF_8));
+                    var productRecord = event.createProducerRecord(topic);
 
                     LOG.trace("Send event {}", productRecord);
 
                     kafkaProducer.send(productRecord).get(kafkaProperties.getTimeout(), TimeUnit.SECONDS);
 
-                    zookeeperClient.setData().forPath("/" + event.getResource() + "/" + event.getId(), "COMPLETED".getBytes(StandardCharsets.UTF_8));
+                    zookeeperClient.setData().forPath("/" + event.resource() + "/" + event.id(), "COMPLETED".getBytes(StandardCharsets.UTF_8));
 
                 }
 
@@ -90,12 +69,12 @@ public class EventProducer {
 
     private PersistentTtlNode createEvent(CdcEvent event) throws Exception {
 
-        if (zookeeperClient.checkExists().creatingParentsIfNeeded().forPath("/" + event.getResource()) == null) {
-            (new PersistentNode(zookeeperClient, CreateMode.PERSISTENT, false, "/" + event.getResource(), new byte[0])).start();
+        if (zookeeperClient.checkExists().creatingParentsIfNeeded().forPath("/" + event.resource()) == null) {
+            (new PersistentNode(zookeeperClient, CreateMode.PERSISTENT, false, "/" + event.resource(), new byte[0])).start();
         }
 
-        if (zookeeperClient.checkExists().forPath("/" + event.getResource() + "/" + event.getId()) == null) {
-            var node = new PersistentTtlNode(zookeeperClient, "/" + event.getResource() + "/" + event.getId(), zookeeperProperties.getEventTTL(),
+        if (zookeeperClient.checkExists().forPath("/" + event.resource() + "/" + event.id()) == null) {
+            var node = new PersistentTtlNode(zookeeperClient, "/" + event.resource() + "/" + event.id(), zookeeperProperties.getEventTTL(),
                     new byte[0]);
             node.start();
             return node;
