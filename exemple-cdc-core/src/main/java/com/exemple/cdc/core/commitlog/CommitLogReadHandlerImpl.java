@@ -7,6 +7,8 @@ import org.apache.cassandra.db.commitlog.CommitLogReadHandler;
 import org.apache.cassandra.db.partitions.PartitionUpdate;
 import org.apache.cassandra.db.rows.Row;
 
+import com.exemple.cdc.core.common.CdcEvent;
+import com.exemple.cdc.core.common.CdcEventFactoryCounter;
 import com.exemple.cdc.core.common.CdcEventFactoryResource;
 import com.exemple.cdc.core.event.EventProducer;
 
@@ -47,11 +49,16 @@ public class CommitLogReadHandlerImpl implements CommitLogReadHandler {
             var rowOrRangeTombstone = it.next();
             var row = (Row) rowOrRangeTombstone;
 
-            if (!isInsert(row)) {
-                LOG.error("Only Insert is expected");
-                continue;
+            final CdcEvent event;
+            if (modification.metadata().isCounter()) {
+                event = new CdcEventFactoryCounter().build(row, modification);
+            } else {
+                if (!isInsert(row)) {
+                    LOG.error("Only Insert is expected");
+                    continue;
+                }
+                event = new CdcEventFactoryResource().build(row, modification);
             }
-            var event = new CdcEventFactoryResource().build(row, modification);
 
             LOG.trace("process {} {}", modification.metadata(), row);
             eventProducer.send(event);

@@ -389,6 +389,99 @@ class AgentIT {
 
     }
 
+    @Nested
+    class CounterEvent {
+
+        @Nested
+        @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+        class CreateEventCounter {
+
+            @Test
+            @Order(1)
+            void firstIncrement() {
+
+                // When perform
+                session.execute("""
+                                UPDATE test_with_counter_history
+                                SET quantity = quantity + 3
+                                WHERE id = 87e4f737-f8b6-4a73-9470-07f02c650191 AND
+                                      date = '2023-12-01 12:00' AND
+                                      user = 'jean.dupond@gmail.com' AND
+                                      application = 'ap1';
+                                """);
+
+                // Then check event
+                await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
+                    ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
+                    assertThat(records.iterator()).toIterable().last().satisfies(event -> {
+
+                        LOG.debug("received event {} {}:\n{}",
+                                event.key(),
+                                Streams.stream(event.headers().iterator())
+                                        .map(header -> header.key() + ":" + new String(header.value()))
+                                        .reduce("", (a, b) -> a + "," + b),
+                                event.value().toPrettyString());
+
+                        assertAll(
+                                () -> assertThat(event.key()).isEqualTo("87e4f737-f8b6-4a73-9470-07f02c650191"),
+                                () -> assertThat(event.headers()).hasSize(3),
+                                () -> assertThat(new String(event.headers().lastHeader("X_User").value())).isEqualTo("jean.dupond@gmail.com"),
+                                () -> assertThat(new String(event.headers().lastHeader("X_Origin").value())).isEqualTo("ap1"),
+                                () -> assertThat(new String(event.headers().lastHeader("X_Resource").value())).isEqualTo("TEST_WITH_COUNTER"),
+                                () -> assertThat(event.value()).isEqualTo(MAPPER.readTree(
+                                        """
+                                        {"quantity": 3, "id": "87e4f737-f8b6-4a73-9470-07f02c650191"}
+                                        """)));
+                    });
+                });
+
+            }
+
+            @Test
+            @Order(2)
+            void secondIncrement() {
+
+                // When perform
+                session.execute("""
+                                UPDATE test_with_counter_history
+                                SET quantity = quantity + 2
+                                WHERE id = 87e4f737-f8b6-4a73-9470-07f02c650191 AND
+                                      date = '2023-12-01 13:00' AND
+                                      user = 'jean.dupond@gmail.com' AND
+                                      application = 'ap1';
+                                """);
+
+                // Then check event
+                await().atMost(Duration.ofSeconds(60)).untilAsserted(() -> {
+                    ConsumerRecords<String, JsonNode> records = consumerEvent.poll(Duration.ofSeconds(5));
+                    assertThat(records.iterator()).toIterable().last().satisfies(event -> {
+
+                        LOG.debug("received event {} {}:\n{}",
+                                event.key(),
+                                Streams.stream(event.headers().iterator())
+                                        .map(header -> header.key() + ":" + new String(header.value()))
+                                        .reduce("", (a, b) -> a + "," + b),
+                                event.value().toPrettyString());
+
+                        assertAll(
+                                () -> assertThat(event.key()).isEqualTo("87e4f737-f8b6-4a73-9470-07f02c650191"),
+                                () -> assertThat(event.headers()).hasSize(3),
+                                () -> assertThat(new String(event.headers().lastHeader("X_User").value())).isEqualTo("jean.dupond@gmail.com"),
+                                () -> assertThat(new String(event.headers().lastHeader("X_Origin").value())).isEqualTo("ap1"),
+                                () -> assertThat(new String(event.headers().lastHeader("X_Resource").value())).isEqualTo("TEST_WITH_COUNTER"),
+                                () -> assertThat(event.value()).isEqualTo(MAPPER.readTree(
+                                        """
+                                        {"quantity": 2, "id": "87e4f737-f8b6-4a73-9470-07f02c650191"}
+                                        """)));
+                    });
+                });
+
+            }
+
+        }
+
+    }
+
     @AfterAll
     public void copyJacocoExec() throws IOException {
 

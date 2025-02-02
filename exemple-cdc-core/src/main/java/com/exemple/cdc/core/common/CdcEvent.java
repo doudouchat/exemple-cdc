@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.cassandra.schema.ColumnMetadata;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.exemple.cdc.core.common.PartitionKeyFactory.PartitionKey;
@@ -59,6 +60,11 @@ public record CdcEvent(String key,
 
         public CdcEventBuilder data(JsonNode value) {
             this.data = value;
+            return this;
+        }
+
+        public CdcEventBuilder data(ColumnMetadata column, JsonNode value) {
+            ((ObjectNode) this.data).set(column.name.toCQLString(), value);
             return this;
         }
 

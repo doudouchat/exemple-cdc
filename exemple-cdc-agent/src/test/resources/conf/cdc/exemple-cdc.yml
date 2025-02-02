@@ -3,6 +3,7 @@ kafka:
    timeout: 10
    topics:
       test: topic_test
+      test_counter: topic_test
 zookeeper:
    host: 172.17.0.1:${zookeeper.port}
    session_timeout: 30000
