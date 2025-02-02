@@ -7,11 +7,10 @@ import org.apache.cassandra.db.commitlog.CommitLogReadHandler;
 import org.apache.cassandra.db.partitions.PartitionUpdate;
 import org.apache.cassandra.db.rows.Row;
 
-import com.exemple.cdc.core.common.CdcEvent;
+import com.exemple.cdc.core.common.CdcEventFactoryResource;
 import com.exemple.cdc.core.event.EventProducer;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,26 +35,25 @@ public class CommitLogReadHandlerImpl implements CommitLogReadHandler {
 
         mutation.getPartitionUpdates().stream()
                 .filter((PartitionUpdate modification) -> modification.metadata().params.cdc)
-                .forEach((PartitionUpdate modification) -> process(descriptor, modification));
+                .forEach(this::process);
 
     }
 
-    @SneakyThrows
-    private void process(CommitLogDescriptor descriptor, PartitionUpdate modification) {
+    private void process(PartitionUpdate modification) {
 
         var it = modification.unfilteredIterator();
+
         while (it.hasNext()) {
             var rowOrRangeTombstone = it.next();
-
             var row = (Row) rowOrRangeTombstone;
 
             if (!isInsert(row)) {
                 LOG.error("Only Insert is expected");
                 continue;
             }
+            var event = new CdcEventFactoryResource().build(row, modification);
 
             LOG.trace("process {} {}", modification.metadata(), row);
-            var event = new CdcEvent(row, modification);
             eventProducer.send(event);
 
         }

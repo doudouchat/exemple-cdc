@@ -98,9 +98,6 @@ class EventProducerTest {
         var cdcEvent = CdcEvent.builder()
                 .key("e143f715-f14e-44b4-90f1-47246661eb7d")
                 .resource("test")
-                .eventType("CREATION")
-                .origin("test")
-                .originVersion("v1")
                 .date(OffsetDateTime.now())
                 .data((ObjectNode) MAPPER.readTree("""
                                                    {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
@@ -135,9 +132,6 @@ class EventProducerTest {
         var event1 = CdcEvent.builder()
                 .key("2bc572fc-b6cd-4763-8ca2-6225689473b3")
                 .resource("test")
-                .eventType("UPDATE")
-                .origin("test")
-                .originVersion("v1")
                 .date(OffsetDateTime.now())
                 .data((ObjectNode) MAPPER.readTree("""
                                                    {"email": "test@gmail.com", "name": "Doe", "id": "2bc572fc-b6cd-4763-8ca2-6225689473b3"}
@@ -148,9 +142,6 @@ class EventProducerTest {
         var event2 = CdcEvent.builder()
                 .key("2bc572fc-b6cd-4763-8ca2-6225689473b3")
                 .resource("test")
-                .eventType("UPDATE")
-                .origin("test")
-                .originVersion("v1")
                 .date(OffsetDateTime.now().plusSeconds(1))
                 .data((ObjectNode) MAPPER.readTree("""
                                                    {"email": "test@gmail.com", "name": "Doe", "id": "2bc572fc-b6cd-4763-8ca2-6225689473b3"}
@@ -182,9 +173,6 @@ class EventProducerTest {
         var event = CdcEvent.builder()
                 .key("e143f715-f14e-44b4-90f1-47246661eb7d")
                 .resource("unknown")
-                .eventType("CREATION")
-                .origin("test")
-                .originVersion("v1")
                 .date(OffsetDateTime.now())
                 .data((ObjectNode) MAPPER.readTree("""
                                                    {"email": "test@gmail.com", "name": "Doe", "id": "e143f715-f14e-44b4-90f1-47246661eb7d"}
@@ -206,9 +194,6 @@ class EventProducerTest {
         var event = CdcEvent.builder()
                 .key("9e933e5e-34ff-4941-ba34-8af3e8965c22")
                 .resource("test")
-                .eventType("CREATION")
-                .origin("test")
-                .originVersion("v1")
                 .date(OffsetDateTime.now())
                 .data((ObjectNode) MAPPER.readTree("""
                                                    {"email": "test@gmail.com", "name": "Doe", "id": "9e933e5e-34ff-4941-ba34-8af3e8965c22"}

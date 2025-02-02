@@ -34,18 +34,19 @@ public class AgentMock {
         Mockito.doAnswer(invocation -> {
             CdcEvent event = invocation.getArgument(0);
 
-            if ("FAILURE_EVENT".equals(event.getEventType())) {
+            var eventType = new String(event.headers().get(CdcEvent.X_EVENT_TYPE));
+            if ("FAILURE_EVENT".equals(eventType)) {
 
                 if (forceSuccess) {
-                    LOG.debug("SUCCESS EVENT " + event.getDate());
+                    LOG.debug("SUCCESS EVENT " + event.date());
                 } else {
-                    LOG.error("FAILURE EVENT " + event.getDate());
+                    LOG.error("FAILURE EVENT " + event.date());
                     throw new Exception("unexpected exception");
                 }
             }
 
-            if ("SUCCESS_EVENT".equals(event.getEventType())) {
-                LOG.debug("SUCCESS EVENT " + event.getDate());
+            if ("SUCCESS_EVENT".equals(eventType)) {
+                LOG.debug("SUCCESS EVENT " + event.date());
             }
 
             return null;
