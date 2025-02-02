@@ -4,6 +4,7 @@ kafka:
    topics:
       test: topic_test
       test_with_composite_key: topic_test
+      test_with_counter: topic_test
 zookeeper:
    host: zookeeper_network:2181
    session_timeout: 30000
