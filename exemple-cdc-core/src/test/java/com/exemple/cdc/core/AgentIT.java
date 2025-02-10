@@ -88,14 +88,14 @@ class AgentIT {
 
                 // When perform
                 session.execute("""
-                                INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                                INSERT INTO test_event (id, date, application, version, event_type, data, user) VALUES (
                                  e143f715-f14e-44b4-90f1-47246661eb7d,
                                  '2023-12-01 12:00',
                                  'app1',
                                  'v1',
                                  'CREATE_ACCOUNT',
                                  '{"email": "test@gmail.com", "name": "Doe"}',
-                                 '2023-12-01'
+                                 'jean.dupond'
                                  );
                                 """);
 
@@ -113,10 +113,11 @@ class AgentIT {
 
                         assertAll(
                                 () -> assertThat(event.key()).isEqualTo("e143f715-f14e-44b4-90f1-47246661eb7d"),
-                                () -> assertThat(event.headers()).hasSize(4),
+                                () -> assertThat(event.headers()).hasSize(5),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Event_Type").value())).isEqualTo("CREATE_ACCOUNT"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Origin").value())).isEqualTo("app1"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Origin_Version").value())).isEqualTo("v1"),
+                                () -> assertThat(new String(event.headers().lastHeader("X_User").value())).isEqualTo("jean.dupond"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Resource").value())).isEqualTo("TEST"),
                                 () -> assertThat(event.value()).isEqualTo(MAPPER.readTree(
                                         """
@@ -133,14 +134,14 @@ class AgentIT {
 
                 // When perform
                 session.execute("""
-                                INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                                INSERT INTO test_event (id, date, application, version, event_type, data, user) VALUES (
                                 7977b564-5f53-4296-bc0a-438900e089ad,
                                 '2023-12-01 13:00',
                                 'app1',
                                 'v1',
                                 'CREATE_ACCOUNT',
                                 '{"email": "other@gmail.com", "name": "Doe"}',
-                                '2023-12-01'
+                                'jean.dupond'
                                 );
                                  """);
 
@@ -158,10 +159,11 @@ class AgentIT {
 
                         assertAll(
                                 () -> assertThat(event.key()).isEqualTo("7977b564-5f53-4296-bc0a-438900e089ad"),
-                                () -> assertThat(event.headers()).hasSize(4),
+                                () -> assertThat(event.headers()).hasSize(5),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Event_Type").value())).isEqualTo("CREATE_ACCOUNT"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Origin").value())).isEqualTo("app1"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Origin_Version").value())).isEqualTo("v1"),
+                                () -> assertThat(new String(event.headers().lastHeader("X_User").value())).isEqualTo("jean.dupond"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Resource").value())).isEqualTo("TEST"),
                                 () -> assertThat(event.value()).isEqualTo(MAPPER.readTree(
                                         """
@@ -179,14 +181,14 @@ class AgentIT {
                 // When perform
                 session.execute("""
                                 BEGIN BATCH
-                                INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                                INSERT INTO test_event (id, date, application, version, event_type, data, user) VALUES (
                                 547700ac-824e-45f4-a6ee-35773259a8c3,
                                 '2023-12-01 12:00',
                                 'app1',
                                 'v1',
                                 'CREATE_ACCOUNT',
                                 '{"email": "test@gmail.com", "name": "Doe"}',
-                                '2023-12-01'
+                                'jean.dupond'
                                 );
                                 INSERT INTO test_other (id) VALUES (547700ac-824e-45f4-a6ee-35773259a8c3);
                                 APPLY BATCH
@@ -206,10 +208,11 @@ class AgentIT {
 
                         assertAll(
                                 () -> assertThat(event.key()).isEqualTo("547700ac-824e-45f4-a6ee-35773259a8c3"),
-                                () -> assertThat(event.headers()).hasSize(4),
+                                () -> assertThat(event.headers()).hasSize(5),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Event_Type").value())).isEqualTo("CREATE_ACCOUNT"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Origin").value())).isEqualTo("app1"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Origin_Version").value())).isEqualTo("v1"),
+                                () -> assertThat(new String(event.headers().lastHeader("X_User").value())).isEqualTo("jean.dupond"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Resource").value())).isEqualTo("TEST"),
                                 () -> assertThat(event.value()).isEqualTo(MAPPER.readTree(
                                         """
@@ -264,7 +267,7 @@ class AgentIT {
                 // When perform
                 session.execute(
                         """
-                        INSERT INTO test_with_composite_key_event (id1, id2, date, application, version, event_type, data, local_date) VALUES (
+                        INSERT INTO test_with_composite_key_event (id1, id2, date, application, version, event_type, data, user) VALUES (
                          b7170cc4-0c01-4049-9417-0a31abb57602,
                          fa3a2317-ebb9-4d64-8138-8acf02c69be6,
                          '2023-12-01 12:00',
@@ -272,7 +275,7 @@ class AgentIT {
                          'v1',
                          'CREATE_ACCOUNT',
                          '{"email": "test@gmail.com", "name": "Doe"}',
-                         '2023-12-01'
+                         'jean.dupond'
                          );
                         """);
 
@@ -290,10 +293,11 @@ class AgentIT {
 
                         assertAll(
                                 () -> assertThat(event.key()).isEqualTo("b7170cc4-0c01-4049-9417-0a31abb57602.fa3a2317-ebb9-4d64-8138-8acf02c69be6"),
-                                () -> assertThat(event.headers()).hasSize(4),
+                                () -> assertThat(event.headers()).hasSize(5),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Event_Type").value())).isEqualTo("CREATE_ACCOUNT"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Origin").value())).isEqualTo("app1"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Origin_Version").value())).isEqualTo("v1"),
+                                () -> assertThat(new String(event.headers().lastHeader("X_User").value())).isEqualTo("jean.dupond"),
                                 () -> assertThat(new String(event.headers().lastHeader("X_Resource").value())).isEqualTo("TEST_WITH_COMPOSITE_KEY"),
                                 () -> assertThat(event.value()).isEqualTo(MAPPER.readTree(
                                         """
@@ -318,14 +322,14 @@ class AgentIT {
             void createEvent() {
 
                 session.execute("""
-                                INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                                INSERT INTO test_event (id, date, application, version, event_type, data, user) VALUES (
                                 50f9e704-b84c-4225-8883-b7b5d6114634,
                                 '2023-12-01 12:00',
                                 'app1',
                                 'v1',
                                 'CREATE_ACCOUNT',
                                 '{"email": "test@gmail.com", "name": "Doe"}',
-                                '2023-12-01'
+                                'jean.dupond'
                                 );
                                 """);
 
@@ -357,14 +361,14 @@ class AgentIT {
             void createEvent() {
 
                 session.execute("""
-                                INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                                INSERT INTO test_event (id, date, application, version, event_type, data, user) VALUES (
                                 4722f55d-b33d-411b-9fdf-b66fb17820aa,
                                 '2023-12-01 12:00',
                                 'app1',
                                 'v1',
                                 'CREATE_ACCOUNT',
                                 '{"email": "test@gmail.com", "name": "Doe"}',
-                                '2023-12-01'
+                                'jean.dupond'
                                  );
                                 """);
 

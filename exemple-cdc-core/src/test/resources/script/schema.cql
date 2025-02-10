@@ -9,7 +9,7 @@ USE test_keyspace;
 CREATE TABLE IF NOT EXISTS test_event( 
 	id UUID,
 	date timestamp,
-	local_date date,
+	user text,
 	data text,
 	event_type text,
 	application text,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS test_with_composite_key_event(
 	id1 UUID,
 	id2 UUID,
 	date timestamp,
-	local_date date,
+	user text,
 	data text,
 	event_type text,
 	application text,

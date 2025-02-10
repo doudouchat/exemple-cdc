@@ -11,7 +11,7 @@ Feature: receive event
   	  CREATE TABLE IF NOT EXISTS test_keyspace.test_event( 
 				id UUID,
 				date timestamp,
-				local_date date,
+				user text,
 				data text,
 				event_type text,
 				application text,
@@ -25,7 +25,7 @@ Feature: receive event
     And reload agent
     When exec script
       """
-       INSERT INTO test_keyspace.test_event (id, date, application, version, event_type, data, local_date) VALUES (
+       INSERT INTO test_keyspace.test_event (id, date, application, version, event_type, data, user) VALUES (
                     5f8839a9-b3ef-4818-a43c-d3c7a709ca14,
                     '2023-12-01 12:00',
                     'app1',
@@ -35,7 +35,7 @@ Feature: receive event
                         "email": "jean.dupond@gmail.com",
                         "lastname":  "Dupond"
                     }',
-                   '2023-12-01'
+                   'jean.dupond'
                    );
       """
     Then receive 1 event

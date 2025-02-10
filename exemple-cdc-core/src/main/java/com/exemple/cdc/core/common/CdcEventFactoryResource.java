@@ -28,6 +28,9 @@ public class CdcEventFactoryResource extends AbstractCdcEventFactory {
             case "data":
                 event.data(convertToJsonNode(row, column));
                 break;
+            case "user":
+                event.header(CdcEvent.X_USER, convertToString(row, column).getBytes(StandardCharsets.UTF_8));
+                break;
             case "version":
                 event.header(CdcEvent.X_ORIGIN_VERSION, convertToString(row, column).getBytes(StandardCharsets.UTF_8));
                 break;

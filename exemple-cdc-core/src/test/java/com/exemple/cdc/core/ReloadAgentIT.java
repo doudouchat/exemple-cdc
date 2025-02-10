@@ -79,14 +79,14 @@ class ReloadAgentIT {
 
         // Given perform
         session.execute("""
-                        INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                        INSERT INTO test_event (id, date, application, version, event_type, data, user) VALUES (
                         48972a46-b48b-499f-aa63-534754497090,
                         '2023-12-01 13:00',
                         'app1',
                         'v1',
                         'CREATE_ACCOUNT',
                         '{"email": "other@gmail.com", "name": "Doe"}',
-                        '2023-12-01'
+                        'jean.dupond'
                         );
                         """);
 
@@ -134,14 +134,14 @@ class ReloadAgentIT {
 
         // When perform
         session.execute("""
-                        INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (
+                        INSERT INTO test_event (id, date, application, version, event_type, data, user) VALUES (
                         55d7566c-077f-4a2f-9b80-b91c7aad2853,
                         '2023-12-01 13:00',
                         'app1',
                         'v1',
                         'CREATE_ACCOUNT',
                         '{"email": "other@gmail.com", "name": "Doe"}',
-                        '2023-12-01'
+                        'jean.dupond'
                         );
                         """);
 

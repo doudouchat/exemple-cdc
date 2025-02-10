@@ -229,19 +229,12 @@ class AgentMockIT {
     private LocalDateTime insertEvent(UUID id, String eventType) {
 
         var eventDate = LocalDateTime.now();
-
-        session.execute("INSERT INTO test_event (id, date, application, version, event_type, data, local_date) VALUES (\n"
-                + id + ",\n"
-                + "'" + eventDate.toString() + "',\n"
-                + "'app1',\n"
-                + "'v1',\n"
-                + "'" + eventType + "',\n"
-                + "'{\n"
-                + "  \"email\": \"other@gmail.com\",\n"
-                + "  \"name\": \"Doe\"\n"
-                + "}',\n"
-                + "'2023-12-01'\n"
-                + ");");
+        
+        session.execute("""
+                        INSERT INTO test_event (id, date, application, version, event_type, data, user) VALUES (
+                        %s,'%s','app1','v1','%s','{"email": "other@gmail.com", "name": "Doe"}','jean.dupond'
+                        );
+                        """.formatted(id, eventDate.toString("yyyy-MM-dd HH:mm:ss.SSS"), eventType));
 
         return eventDate;
     }
