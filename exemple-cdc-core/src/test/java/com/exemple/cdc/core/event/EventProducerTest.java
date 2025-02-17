@@ -58,7 +58,7 @@ class EventProducerTest {
     private GenericContainer<?> embeddedZookeeper;
 
     @BeforeAll
-    public void createSchema() throws IOException {
+    void createSchema() throws IOException {
 
         Map<String, Object> kafka = Map.of(
                 "bootstrap_servers", "localhost:" + kafkaContainer.getMappedPort(9092),

@@ -67,7 +67,7 @@ class ReloadAgentIT {
     private GenericContainer<?> embeddedZookeeper;
 
     @BeforeAll
-    public void createSchema() throws IOException {
+    void createSchema() throws IOException {
 
         var schema = new FileSystemResource(ResourceUtils.getFile("classpath:script/schema.cql"));
         Arrays.stream(schema.getContentAsString(StandardCharsets.UTF_8).trim().split(";")).forEach(session::execute);
@@ -162,7 +162,7 @@ class ReloadAgentIT {
     }
 
     @AfterAll
-    public void copyJacocoExec() throws IOException {
+    void copyJacocoExec() throws IOException {
 
         try (var localJacocoFile = new FileOutputStream("target/jacoco-reload-it.exec")) {
 
@@ -186,7 +186,7 @@ class ReloadAgentIT {
     }
 
     @AfterAll
-    public void closeContainer() {
+    void closeContainer() {
         consumerEvent.close();
         embeddedKafka.stop();
         embeddedZookeeper.stop();

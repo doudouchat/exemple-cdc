@@ -65,7 +65,7 @@ class AgentMockIT {
     private GenericContainer<?> embeddedZookeeper;
 
     @BeforeAll
-    public void createSchema() throws IOException {
+    void createSchema() throws IOException {
 
         var schema = new FileSystemResource(ResourceUtils.getFile("classpath:script/schema.cql"));
         Arrays.stream(schema.getContentAsString(StandardCharsets.UTF_8).trim().split(";")).forEach(session::execute);
@@ -198,7 +198,7 @@ class AgentMockIT {
     }
 
     @AfterAll
-    public void copyJacocoExec() throws IOException {
+    void copyJacocoExec() throws IOException {
 
         try (var localJacocoFile = new FileOutputStream("target/jacoco-mock-it.exec")) {
 
@@ -221,7 +221,7 @@ class AgentMockIT {
     }
 
     @AfterAll
-    public void closeContainer() {
+    void closeContainer() {
         embeddedKafka.stop();
         embeddedZookeeper.stop();
     }
@@ -229,7 +229,7 @@ class AgentMockIT {
     private LocalDateTime insertEvent(UUID id, String eventType) {
 
         var eventDate = LocalDateTime.now();
-        
+
         session.execute("""
                         INSERT INTO test_event (id, date, application, version, event_type, data, user) VALUES (
                         %s,'%s','app1','v1','%s','{"email": "other@gmail.com", "name": "Doe"}','jean.dupond'
