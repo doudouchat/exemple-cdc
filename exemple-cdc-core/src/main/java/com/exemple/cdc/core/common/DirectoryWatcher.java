@@ -31,7 +31,10 @@ public final class DirectoryWatcher {
     @SneakyThrows
     public void onCreateFile() {
 
-        var observer = new FileAlterationObserver(directory.toString(), filter);
+        var observer = FileAlterationObserver.builder()
+                .setFile(directory.toString())
+                .setFileFilter(filter)
+                .get();
         var monitor = new FileAlterationMonitor(intervalMillis);
         var listener = new FileAlterationListenerAdaptor() {
 
