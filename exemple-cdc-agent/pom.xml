@@ -374,6 +374,8 @@
 													<JVM_EXTRA_OPTS>-javaagent:/tmp/lib/jacocoagent.jar=includes=com.exemple.cdc.*,output=tcpserver,address=*,classdumpdir=/tmp/agent/source -javaagent:/exemple-cdc-agent.jar=conf=/tmp/conf/exemple-cdc.yml</JVM_EXTRA_OPTS>
 													<CASSANDRA_CLUSTER_NAME>cassandra-cluster-it</CASSANDRA_CLUSTER_NAME>
 													<CASSANDRA_SEEDS>172.17.0.4</CASSANDRA_SEEDS>
+													<HEAP_NEWSIZE>128M</HEAP_NEWSIZE>
+													<MAX_HEAP_SIZE>1024M</MAX_HEAP_SIZE>
 												</env>
 												<volumes>
 													<bind>
@@ -436,6 +438,8 @@
 													<JVM_EXTRA_OPTS>-javaagent:/tmp/lib/jacocoagent.jar=includes=com.exemple.cdc.*,output=tcpserver,address=*,classdumpdir=/tmp/agent/source -javaagent:/exemple-cdc-agent.jar=conf=/tmp/conf/exemple-cdc.yml</JVM_EXTRA_OPTS>
 													<CASSANDRA_CLUSTER_NAME>cassandra-cluster-it</CASSANDRA_CLUSTER_NAME>
 													<CASSANDRA_SEEDS>172.17.0.4</CASSANDRA_SEEDS>
+													<HEAP_NEWSIZE>128M</HEAP_NEWSIZE>
+													<MAX_HEAP_SIZE>1024M</MAX_HEAP_SIZE>
 												</env>
 												<volumes>
 													<bind>
