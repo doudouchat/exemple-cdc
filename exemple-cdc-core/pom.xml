@@ -53,11 +53,11 @@
 			<artifactId>dagger</artifactId>
 		</dependency>
 
-		<!-- FASTER JACKSON -->
+		<!-- TOOLS JACKSON -->
 
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
+			<groupId>tools.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 		<!-- COMMONS APACHE -->

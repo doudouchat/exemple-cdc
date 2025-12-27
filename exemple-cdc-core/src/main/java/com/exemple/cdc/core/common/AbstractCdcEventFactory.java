@@ -7,7 +7,8 @@ import org.apache.cassandra.db.rows.Row;
 import org.apache.cassandra.schema.ColumnMetadata;
 
 import com.exemple.cdc.core.common.PartitionKeyFactory.PartitionKey;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tools.jackson.databind.ObjectMapper;
 
 public abstract class AbstractCdcEventFactory {
 

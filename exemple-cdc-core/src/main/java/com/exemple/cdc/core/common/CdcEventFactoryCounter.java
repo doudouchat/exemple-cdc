@@ -12,7 +12,8 @@ import org.apache.cassandra.db.rows.Row;
 import org.apache.cassandra.schema.ColumnMetadata;
 
 import com.exemple.cdc.core.common.PartitionKeyFactory.PartitionKey;
-import com.fasterxml.jackson.databind.node.LongNode;
+
+import tools.jackson.databind.node.LongNode;
 
 public class CdcEventFactoryCounter extends AbstractCdcEventFactory {
 

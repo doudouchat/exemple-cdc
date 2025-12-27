@@ -14,11 +14,11 @@ import org.apache.zookeeper.CreateMode;
 import com.exemple.cdc.core.common.CdcEvent;
 import com.exemple.cdc.core.configuration.kafka.KafkaProperties;
 import com.exemple.cdc.core.configuration.zookeeper.ZookeeperProperties;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
 
 @RequiredArgsConstructor
 @Slf4j

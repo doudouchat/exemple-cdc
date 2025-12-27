@@ -13,10 +13,10 @@ import com.exemple.cdc.core.configuration.zookeeper.DaggerZookeeperClientCompone
 import com.exemple.cdc.core.configuration.zookeeper.ZookeeperClientModule;
 import com.exemple.cdc.core.configuration.zookeeper.ZookeeperProperties;
 import com.exemple.cdc.core.event.EventProducer;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import dagger.Module;
 import dagger.Provides;
+import tools.jackson.databind.JsonNode;
 
 @Module
 public class EventProducerModule {
