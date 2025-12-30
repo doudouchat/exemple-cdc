@@ -37,7 +37,7 @@ public class EventProducer {
 
         try (PersistentTtlNode node = createEvent(event)) {
 
-            InterProcessLock lock = new InterProcessSemaphoreMutex(zookeeperClient, "/" + event.resource() + event.id());
+            InterProcessLock lock = new InterProcessSemaphoreMutex(zookeeperClient, "/" + event.resource() + "/" + event.id());
 
             try {
                 lock.acquire();

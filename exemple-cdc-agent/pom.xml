@@ -26,7 +26,7 @@
 			<dependency>
 				<groupId>io.cucumber</groupId>
 				<artifactId>cucumber-bom</artifactId>
-				<version>7.22.2</version>
+				<version>7.33.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
