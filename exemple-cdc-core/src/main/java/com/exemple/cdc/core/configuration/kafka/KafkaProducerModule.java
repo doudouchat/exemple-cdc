@@ -14,13 +14,12 @@ import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.yaml.snakeyaml.Yaml;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import dagger.Module;
 import dagger.Provides;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Module
 @Slf4j
@@ -69,7 +68,6 @@ public class KafkaProducerModule {
         private static final ObjectMapper MAPPER = new ObjectMapper();
 
         @Override
-        @SneakyThrows
         public byte[] serialize(String topic, JsonNode data) {
             return MAPPER.writeValueAsBytes(data);
         }

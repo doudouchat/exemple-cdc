@@ -4,9 +4,8 @@ import javax.inject.Singleton;
 
 import org.apache.kafka.clients.producer.Producer;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import dagger.Component;
+import tools.jackson.databind.JsonNode;
 
 @Singleton
 @Component(modules = KafkaProducerModule.class)

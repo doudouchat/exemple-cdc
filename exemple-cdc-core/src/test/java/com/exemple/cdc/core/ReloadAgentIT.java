@@ -36,10 +36,10 @@ import org.testcontainers.kafka.KafkaContainer;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.exemple.cdc.core.core.AgentTestConfiguration;
 import com.exemple.cdc.core.core.cassandra.EmbeddedCassandraConfiguration;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = { EmbeddedCassandraConfiguration.class, AgentTestConfiguration.class })
 @ActiveProfiles("test")

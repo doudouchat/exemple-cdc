@@ -9,9 +9,6 @@
 
 	<properties>
 
-		<!-- VERSION -->
-		<maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
-
 		<!-- SONAR -->
 		<sonar.coverage.jacoco.xmlReportPaths>${sonar.coverage.report.path}</sonar.coverage.jacoco.xmlReportPaths>
 
@@ -115,7 +112,7 @@
 
 		<dependency>
 			<groupId>org.testcontainers</groupId>
-			<artifactId>junit-jupiter</artifactId>
+			<artifactId>testcontainers-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
 

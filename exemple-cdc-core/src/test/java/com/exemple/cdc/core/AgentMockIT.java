@@ -17,6 +17,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jacoco.core.data.ExecutionDataWriter;
 import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
@@ -39,7 +40,6 @@ import org.springframework.util.ResourceUtils;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame.OutputType;
 import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.exemple.cdc.core.commitlog.CommitLogProcess;

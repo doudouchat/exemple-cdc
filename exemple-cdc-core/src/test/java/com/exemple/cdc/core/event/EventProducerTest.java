@@ -32,11 +32,11 @@ import com.exemple.cdc.core.common.CdcEvent;
 import com.exemple.cdc.core.configuration.kafka.KafkaProducerModule;
 import com.exemple.cdc.core.configuration.zookeeper.ZookeeperClientModule;
 import com.exemple.cdc.core.core.AgentTestConfiguration;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 @SpringBootTest(classes = AgentTestConfiguration.class)
 @ActiveProfiles("test")
@@ -92,7 +92,7 @@ class EventProducerTest {
     }
 
     @Test
-    void sendOneEvent() throws IOException {
+    void sendOneEvent() {
 
         // Setup event
         var cdcEvent = CdcEvent.builder()
@@ -126,7 +126,7 @@ class EventProducerTest {
     }
 
     @Test
-    void sendTwoEvents() throws IOException {
+    void sendTwoEvents() {
 
         // Setup one event
         var event1 = CdcEvent.builder()
@@ -167,7 +167,7 @@ class EventProducerTest {
     }
 
     @Test
-    void sendOneEventFailsBecauseResourceIsIncorrect() throws IOException {
+    void sendOneEventFailsBecauseResourceIsIncorrect() {
 
         // Setup event
         var event = CdcEvent.builder()
@@ -188,7 +188,7 @@ class EventProducerTest {
     }
 
     @Test
-    void sendMultiEvents() throws IOException, InterruptedException {
+    void sendMultiEvents() throws InterruptedException {
 
         // Setup event
         var event = CdcEvent.builder()

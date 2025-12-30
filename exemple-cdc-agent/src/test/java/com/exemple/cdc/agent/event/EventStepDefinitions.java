@@ -11,11 +11,11 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
 
 @Slf4j
 public class EventStepDefinitions {
