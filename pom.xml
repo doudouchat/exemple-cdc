@@ -38,13 +38,6 @@
 
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>confluent</id>
-			<url>https://packages.confluent.io/maven/</url>
-		</repository>
-	</repositories>
-
 	<dependencyManagement>
 
 		<dependencies>
@@ -62,14 +55,6 @@
 						<artifactId>*</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-
-			<!-- KAFKA -->
-
-			<dependency>
-				<groupId>io.confluent</groupId>
-				<artifactId>kafka-json-schema-serializer</artifactId>
-				<version>7.9.1</version>
 			</dependency>
 
 			<!-- CURATOR -->

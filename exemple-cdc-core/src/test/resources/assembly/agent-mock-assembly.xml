@@ -14,6 +14,7 @@
 			<scope>test</scope>
 			<excludes>
 				<exclude>org.springframework.boot:*</exclude>
+				<exclude>org.springframework.kafka:*</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>

@@ -23,11 +23,6 @@
 			<artifactId>kafka-clients</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>io.confluent</groupId>
-			<artifactId>kafka-json-schema-serializer</artifactId>
-		</dependency>
-
 		<!-- CASSANDRA -->
 
 		<dependency>
@@ -59,7 +54,7 @@
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 		<!-- COMMONS APACHE -->
@@ -97,6 +92,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
 			<scope>test</scope>
 		</dependency>
 

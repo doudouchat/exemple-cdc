@@ -10,14 +10,15 @@ import javax.inject.Singleton;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dagger.Module;
 import dagger.Provides;
-import io.confluent.kafka.serializers.KafkaJsonSerializer;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,7 +48,7 @@ public class KafkaProducerModule {
         var props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getBoostrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaJsonSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
 
         return new KafkaProducer<>(props);
     }
@@ -61,6 +62,18 @@ public class KafkaProducerModule {
                 .timeout((int) kafkaProperties.get("timeout"))
                 .topics((Map<String, String>) kafkaProperties.get("topics"))
                 .build();
+    }
+
+    public static class JacksonJsonSerializer implements Serializer<JsonNode> {
+
+        private static final ObjectMapper MAPPER = new ObjectMapper();
+
+        @Override
+        @SneakyThrows
+        public byte[] serialize(String topic, JsonNode data) {
+            return MAPPER.writeValueAsBytes(data);
+        }
+
     }
 
 }

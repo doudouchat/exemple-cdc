@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -18,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import org.jacoco.core.data.ExecutionDataWriter;
 import org.jacoco.core.runtime.RemoteControlReader;
 import org.jacoco.core.runtime.RemoteControlWriter;
-import org.joda.time.LocalDateTime;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.ClassOrderer;
@@ -119,6 +120,8 @@ class AgentMockIT {
     @TestMethodOrder(OrderAnnotation.class)
     class CreateExceptionEvents {
 
+        private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+
         private LocalDateTime failureEvent;
 
         private LocalDateTime successEvent;
@@ -132,7 +135,7 @@ class AgentMockIT {
 
             // Then check logs
             await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
-                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("SUCCESS EVENT " + event);
+                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("SUCCESS EVENT " + event.format(DATE_FORMAT));
             });
         }
 
@@ -145,7 +148,7 @@ class AgentMockIT {
 
             // Then check logs
             await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
-                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("FAILURE EVENT " + this.failureEvent);
+                assertThat(embeddedCassandra.getLogs(OutputType.STDOUT)).containsOnlyOnce("FAILURE EVENT " + this.failureEvent.format(DATE_FORMAT));
             });
         }
 
@@ -169,7 +172,8 @@ class AgentMockIT {
 
             // Then check logs
             await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
-                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "FAILURE EVENT " + this.failureEvent)).isEqualTo(2);
+                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT),
+                        "FAILURE EVENT " + this.failureEvent.format(DATE_FORMAT))).isEqualTo(2);
             });
         }
 
@@ -190,8 +194,10 @@ class AgentMockIT {
 
             // Then check logs
             await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
-                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "SUCCESS EVENT " + this.failureEvent)).isEqualTo(1);
-                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT), "SUCCESS EVENT " + this.successEvent)).isEqualTo(1);
+                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT),
+                        "SUCCESS EVENT " + this.failureEvent.format(DATE_FORMAT))).isEqualTo(1);
+                assertThat(StringUtils.countMatches(embeddedCassandra.getLogs(OutputType.STDOUT),
+                        "SUCCESS EVENT " + this.successEvent.format(DATE_FORMAT))).isEqualTo(1);
             });
         }
 
@@ -234,7 +240,7 @@ class AgentMockIT {
                         INSERT INTO test_event (id, date, application, version, event_type, data, user) VALUES (
                         %s,'%s','app1','v1','%s','{"email": "other@gmail.com", "name": "Doe"}','jean.dupond'
                         );
-                        """.formatted(id, eventDate.toString("yyyy-MM-dd HH:mm:ss.SSS"), eventType));
+                        """.formatted(id, eventDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")), eventType));
 
         return eventDate;
     }
