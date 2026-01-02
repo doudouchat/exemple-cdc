@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.datastax.oss.driver.shaded.guava.common.base.Strings;
+import com.google.common.base.Strings;
 
 import lombok.Getter;
 

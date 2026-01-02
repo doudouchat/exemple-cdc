@@ -45,9 +45,16 @@
 		</dependency>
 
 		<!-- CASSANDRA -->
+
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-all</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.cassandra</groupId>
+			<artifactId>java-driver-core</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- TEST -->
