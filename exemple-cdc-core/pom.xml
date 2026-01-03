@@ -166,6 +166,7 @@
 							<descriptors>
 								<descriptor>src/test/resources/assembly/agent-assembly.xml</descriptor>
 							</descriptors>
+							<skipAssembly>${maven.test.skip}</skipAssembly>
 						</configuration>
 					</execution>
 					<execution>
@@ -186,6 +187,7 @@
 							<descriptors>
 								<descriptor>src/test/resources/assembly/agent-mock-assembly.xml</descriptor>
 							</descriptors>
+							<skipAssembly>${maven.test.skip}</skipAssembly>
 						</configuration>
 					</execution>
 				</executions>
