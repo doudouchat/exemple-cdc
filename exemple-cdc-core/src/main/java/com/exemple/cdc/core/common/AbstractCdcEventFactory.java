@@ -42,11 +42,10 @@ public abstract class AbstractCdcEventFactory {
             readPartitionKey(partitionKey);
         }
 
-        modification.metadata().clusteringColumns().stream()
-                .forEach((ColumnMetadata column) -> {
-                    var value = column.type.compose(row.clustering().bufferAt(column.position()));
-                    readClusteringColumn(column, value);
-                });
+        modification.metadata().clusteringColumns().forEach((ColumnMetadata column) -> {
+            var value = column.type.compose(row.clustering().bufferAt(column.position()));
+            readClusteringColumn(column, value);
+        });
 
         readPartitionUpdate(modification);
 

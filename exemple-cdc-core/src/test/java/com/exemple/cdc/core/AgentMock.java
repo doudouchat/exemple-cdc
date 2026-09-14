@@ -1,10 +1,13 @@
 package com.exemple.cdc.core;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+
 import java.lang.instrument.Instrumentation;
 import java.nio.file.Paths;
 
 import org.apache.cassandra.config.DatabaseDescriptor;
-import org.mockito.Mockito;
 
 import com.exemple.cdc.core.common.CdcEvent;
 import com.exemple.cdc.core.event.EventProducer;
@@ -30,8 +33,8 @@ public class AgentMock {
         var cdcLogPath = Paths.get(DatabaseDescriptor.getCDCLogLocation());
         LOG.info(cdcLogPath.toString());
 
-        var eventProducer = Mockito.mock(EventProducer.class);
-        Mockito.doAnswer(invocation -> {
+        var eventProducer = mock(EventProducer.class);
+        doAnswer(invocation -> {
             CdcEvent event = invocation.getArgument(0);
 
             var eventType = new String(event.headers().get(CdcEvent.X_EVENT_TYPE));
@@ -50,7 +53,7 @@ public class AgentMock {
             }
 
             return null;
-        }).when(eventProducer).send(Mockito.any());
+        }).when(eventProducer).send(any());
 
         var agentProcess = new ProcessRun(cdcLogPath, eventProducer);
         agentProcess.start();

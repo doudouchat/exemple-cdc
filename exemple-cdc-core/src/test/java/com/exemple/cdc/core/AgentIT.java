@@ -4,19 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.jacoco.core.data.ExecutionDataWriter;
-import org.jacoco.core.runtime.RemoteControlReader;
-import org.jacoco.core.runtime.RemoteControlWriter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -36,6 +30,7 @@ import org.testcontainers.containers.output.OutputFrame.OutputType;
 import org.testcontainers.kafka.KafkaContainer;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.exemple.cdc.core.common.JacocoUtils;
 import com.exemple.cdc.core.core.AgentTestConfiguration;
 import com.exemple.cdc.core.core.cassandra.EmbeddedCassandraConfiguration;
 import com.google.common.collect.Streams;
@@ -487,29 +482,11 @@ class AgentIT {
     }
 
     @AfterAll
-    void copyJacocoExec() throws IOException {
+    void closeContainer() throws IOException {
 
-        try (var localJacocoFile = new FileOutputStream("target/jacoco-it.exec")) {
+        JacocoUtils.copyJacocoExec(embeddedCassandra, 6300, "target/jacoco-it.exec");
 
-            try (var socket = new Socket(InetAddress.getByName(embeddedCassandra.getHost()), embeddedCassandra.getMappedPort(6300))) {
-
-                var writer = new RemoteControlWriter(socket.getOutputStream());
-                writer.visitDumpCommand(true, false);
-
-                var reader = new RemoteControlReader(socket.getInputStream());
-
-                var localWriter = new ExecutionDataWriter(localJacocoFile);
-                reader.setSessionInfoVisitor(localWriter);
-                reader.setExecutionDataVisitor(localWriter);
-                reader.read();
-
-            }
-        }
         embeddedCassandra.stop();
-    }
-
-    @AfterAll
-    void closeContainer() {
         consumerEvent.close();
         embeddedKafka.stop();
         embeddedZookeeper.stop();
